@@ -4,9 +4,8 @@ import { useLanguageStore } from '../store/language';
 import { useImageStore } from '../store/imageStore';
 
 const imageStore = useImageStore();
-onMounted(() => {
-  imageStore.fetchImagePath();
-});
+imageStore.fetchImagePath();
+
 
 const languageStore = useLanguageStore();
 

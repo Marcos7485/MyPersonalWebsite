@@ -24,8 +24,9 @@ class ReviewsController extends Controller
     public function ReviewCliente($hash)
     {
         $verificador = Projects::where('hash', $hash)->first();
+        
         if(!empty($verificador)){
-            return Inertia::render('reviews.reviewPage');
+            return Inertia::render('reviews/reviews', ['hash' => $hash]);
         } else {
             return redirect()->route('index');
         }

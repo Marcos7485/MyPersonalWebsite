@@ -4,9 +4,7 @@ import { useLanguageStore } from '../store/language.ts';
 import { useImageStore } from '../store/imageStore.ts';
 
 const imageStore = useImageStore();
-onMounted(() => {
-    imageStore.fetchImagePath();
-});
+imageStore.fetchImagePath();
 
 const backgroundSoftware = computed(() => ({
     backgroundImage: `url(${imageStore.imagePath}/seccion-3/agenda.webp)`
