@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, defineProps } from 'vue';
+import { ref, onMounted } from 'vue';
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Autoplay } from 'swiper/modules';
 import { useLanguageStore } from '../store/language.ts';

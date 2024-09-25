@@ -6,7 +6,6 @@ use App\Http\Requests\ReviewRequest;
 use App\Models\Projects;
 use App\Models\Reviews;
 use Inertia\Inertia;
-use SebastianBergmann\CodeCoverage\Report\Xml\Project;
 
 class ReviewsController extends Controller
 {

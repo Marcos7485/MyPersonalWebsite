@@ -19,8 +19,10 @@ return new class extends Migration
             $table->string('valor_total');
             $table->string('plazo');
             $table->string('progreso');
+            $table->string('mantenimiento');
             $table->date('finalizado');
             $table->string('hash');
+            $table->boolean('active')->default(true);
             $table->timestamps();
         });
     }

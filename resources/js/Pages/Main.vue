@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { DefineProps } from 'vue'
 import Header from '../../components/HeaderView.vue'
 import Footer from '../../components/FooterView.vue'
 import LanguagesSelector from '../../components/LanguagesSelector.vue'
