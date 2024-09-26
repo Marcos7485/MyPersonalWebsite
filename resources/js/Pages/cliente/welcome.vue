@@ -67,8 +67,8 @@ const submitForm = async () => {
 
     <transition name="fade">
         <div v-if="showVideo" class="video-overlay">
-            <video ref="transitionVideo" @ended="onVideoEnd" autoplay muted class="transition-video">
-                <source src="/public/images/cliente/ejemplo.mp4" type="video/mp4" />
+            <video ref="transitionVideo" @ended="onVideoEnd" autoplay class="transition-video">
+                <source src="/public/images/cliente/video.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
             </video>
         </div>
@@ -114,17 +114,25 @@ const submitForm = async () => {
 
 <style scoped>
 
+.transition-video {
+    width: 100%;
+    max-width: 100vw;
+    height: auto;
+    max-height: 100vh;
+    object-fit: cover;
+}
+
 .video-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: black;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
 }
 
 #logo img {
@@ -257,6 +265,13 @@ const submitForm = async () => {
 }
 
 @media (max-width: 600px) {
+
+    .transition-video {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        /* O `cover` si prefieres que el video llene completamente la pantalla */
+    }
 
     #logo img {
         position: absolute;
