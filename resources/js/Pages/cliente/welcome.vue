@@ -13,6 +13,8 @@ onMounted(() => {
 
 const languageStore = useLanguageStore();
 const showVideo = ref(false);
+const isMobile = ref(false); 
+
 
 interface FormData {
     code: string;
@@ -26,6 +28,9 @@ const onVideoEnd = () => {
     router.visit(redirectUrl.value); // Redirige después de que el video termina
 };
 
+onMounted(() => {
+    isMobile.value = window.innerWidth < 600;
+});
 
 const errorMessage = ref<string | null>(null);
 const responseMessage = ref<string | null>(null);
@@ -67,11 +72,12 @@ const submitForm = async () => {
 
     <transition name="fade">
         <div v-if="showVideo" class="video-overlay">
-            <video ref="transitionVideo" @ended="onVideoEnd" autoplay class="transition-video desktop-video">
+            <!-- Cargar solo el video basado en el ancho de la pantalla -->
+            <video v-if="!isMobile" ref="transitionVideo" @ended="onVideoEnd" autoplay class="transition-video">
                 <source src="/public/images/cliente/video.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
             </video>
-            <video ref="transitionVideo" @ended="onVideoEnd" autoplay class="transition-video mobile-video">
+            <video v-if="isMobile" ref="transitionVideo" @ended="onVideoEnd" autoplay class="transition-video">
                 <source src="/public/images/cliente/video-cel.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
             </video>
@@ -117,10 +123,6 @@ const submitForm = async () => {
 </template>
 
 <style scoped>
-
-.mobile-video{
-    display: none;
-}
 
 .transition-video {
     width: 100%;
@@ -274,18 +276,18 @@ const submitForm = async () => {
 
 @media (max-width: 600px) {
 
-    .desktop-video{
+    .desktop-video {
         display: none;
     }
 
-    .mobile-video{
+    .mobile-video {
         display: block;
     }
 
     .transition-video {
         width: 100%;
-        height: auto;
-        object-fit: contain;
+        height: 100%;
+        object-fit: cover;
         /* O `cover` si prefieres que el video llene completamente la pantalla */
     }
 
