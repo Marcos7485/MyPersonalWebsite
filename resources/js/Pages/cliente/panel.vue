@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Ref, onMounted, computed } from 'vue';
 import { useImageStore } from '../../../store/imageStore';
+import { Link } from '@inertiajs/vue3';
 
 const imageStore = useImageStore();
 onMounted(() => {
@@ -93,7 +94,7 @@ const progressProject = computed(() => Number(props.project.progreso));
           <img :src="`${imageStore.imagePath}/cliente/panel/input-dinero.png`">
         </div>
         <div class="banner">
-          <img :src="`${imageStore.imagePath}/letras.webp`" alt="">
+          <Link href="/"><img :src="`${imageStore.imagePath}/letras.webp`" alt=""></Link>
         </div>
         <div class="item-cliente">
           <h1>{{ props.project.cliente }}</h1>
@@ -156,8 +157,7 @@ const progressProject = computed(() => Number(props.project.progreso));
 </template>
 
 <style scoped>
-
-.item-mantenimiento h1{
+.item-mantenimiento h1 {
   color: white;
 }
 
@@ -171,7 +171,7 @@ const progressProject = computed(() => Number(props.project.progreso));
   animation: appear 2s 3s forwards;
 }
 
-.item-finalizado h1{
+.item-finalizado h1 {
   color: white;
 }
 
@@ -446,5 +446,230 @@ const progressProject = computed(() => Number(props.project.progreso));
   100% {
     opacity: 1;
   }
+}
+
+@media (max-width: 600px) {
+
+  .content {
+    height: 150rem;
+  }
+
+  .content p {
+  font-size: 2.2rem;
+}
+
+  .banner img {
+    width: 25rem;
+  }
+
+  .item-mantenimiento {
+    position: absolute;
+    color: var(--color-base);
+    top: 125rem;
+    width: 100vw;
+    left: 0vw;
+    text-align: center;
+    opacity: 0;
+    animation: appear 2s 3s forwards;
+  }
+
+  .item-finalizado {
+    position: absolute;
+    color: var(--color-base);
+    top: 118rem;
+    left: 25vw;
+    text-align: center;
+    opacity: 0;
+    animation: appear 2s 3s forwards;
+  }
+
+  .progress-bar-progreso {
+    width: 70vw;
+    height: 3rem;
+    background-color: #e0e0e0;
+    border-radius: 4rem 1rem;
+    overflow: hidden;
+  }
+
+  .item-plazo {
+    position: absolute;
+    color: var(--color-base);
+    top: 101rem;
+    left: 15%;
+    text-align: center;
+    opacity: 0;
+    animation: appear 2s 2.5s forwards;
+  }
+
+  .progress-bar {
+    width: 70vw;
+    height: 3rem;
+    background-color: #e0e0e0;
+    border-radius: 4rem 1rem;
+    overflow: hidden;
+  }
+
+  .item-progreso {
+    position: absolute;
+    color: var(--color-base);
+    top: 89rem;
+    left: 15%;
+    text-align: center;
+    opacity: 0;
+    animation: appear 2s 2.5s forwards;
+  }
+
+
+  #figura11 img {
+    position: absolute;
+    width: 40rem;
+    top: 77rem;
+    left: 0;
+    opacity: 0;
+    animation: appear 2s 2.5s forwards;
+  }
+
+  .item-pago3 p {
+    position: absolute;
+    color: var(--color-base);
+    top: 79.5rem;
+    left: 36vw;
+    text-align: center;
+    opacity: 0;
+    animation: appear 2s 3s forwards;
+  }
+
+  #figura10 img {
+    position: absolute;
+    width: 40rem;
+    top: 74rem;
+    left: 15vw;
+    opacity: 0;
+    animation: appear 2s 2.5s forwards;
+  }
+
+  .item-pago2 p {
+    position: absolute;
+    color: var(--color-base);
+    top: 68rem;
+    left: 21vw;
+    text-align: center;
+    opacity: 0;
+    animation: appear 2s 3s forwards;
+  }
+
+  #figura9 img {
+    position: absolute;
+    width: 40rem;
+    top: 62rem;
+    left: 15vw;
+    opacity: 0;
+    animation: appear 2s 2.5s forwards;
+  }
+
+  .item-pago1 p {
+    position: absolute;
+    color: var(--color-base);
+    top: 56rem;
+    left: 21vw;
+    text-align: center;
+    opacity: 0;
+    animation: appear 2s 3s forwards;
+  }
+
+  #figura8 img {
+    position: absolute;
+    width: 40rem;
+    top: 50rem;
+    left: 15vw;
+    opacity: 0;
+    animation: appear 2s 2.5s forwards;
+  }
+
+  .item-inicio h1 {
+    position: absolute;
+    color: var(--color-base);
+    top: 41.5rem;
+    left: 32vw;
+    text-align: center;
+    opacity: 0;
+    animation: appear 2s 3s forwards;
+  }
+
+  #figura7 img {
+    position: absolute;
+    width: 40rem;
+    top: 38rem;
+    left: 15vw;
+    opacity: 0;
+    animation: appear 2s 2.5s forwards;
+  }
+
+  .item-tipo h1 {
+    position: absolute;
+    color: var(--color-base);
+    top: 29.5rem;
+    left: 23vw;
+    text-align: center;
+    opacity: 0;
+    animation: appear 2s 3s forwards;
+  }
+
+
+  #figura6 img {
+    position: absolute;
+    width: 40rem;
+    top: 26rem;
+    left: 15vw;
+    opacity: 0;
+    animation: appear 2s 2.5s forwards;
+  }
+
+  .item-cliente h1 {
+    position: absolute;
+    color: var(--color-base);
+    top: 17rem;
+    left: 28vw;
+    text-align: center;
+    opacity: 0;
+    animation: appear 2s 3s forwards;
+  }
+
+  #figura5 img {
+    position: absolute;
+    width: 40rem;
+    top: 14rem;
+    left: 15vw;
+    opacity: 0;
+    animation: appear 2s 2.5s forwards;
+  }
+
+  #figura4 {
+    display: none;
+  }
+
+
+  #figura1 img {
+    position: absolute;
+    width: 15rem;
+    top: 5.5rem;
+    right: 0;
+    opacity: 0;
+    animation: appear 2s 1s forwards;
+  }
+
+  #figura2 img {
+    position: absolute;
+    width: 20rem;
+    top: 138rem;
+    right: 0;
+    opacity: 0;
+    animation: appear 2s 1.2s forwards;
+  }
+
+  #figura3 img {
+    top: 135.5rem;
+  }
+
 }
 </style>
