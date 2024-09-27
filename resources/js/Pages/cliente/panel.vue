@@ -114,8 +114,8 @@ const progressProject = computed(() => Number(props.project.progreso));
         </div>
 
         <div class="item-pago2">
-          <p>Restante (50%): ${{ Math.round(Number(props.project.valor_total) / 2) }} - {{
-            formatDate(props.project.pago_final) }}</p>
+          <p>Restante (50%): ${{ Math.round(Number(props.project.valor_total) / 2) }} - {{ props.project.pago_final = null ?
+            formatDate(props.project.pago_final) : '' }}</p>
         </div>
 
         <div class="item-pago3">

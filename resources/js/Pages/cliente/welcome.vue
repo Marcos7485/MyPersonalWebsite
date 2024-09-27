@@ -53,6 +53,7 @@ const submitForm = async () => {
             // Redirige a la nueva página usando Inertia
             // router.visit(response.data.redirect);
         } else if (response.data.error) {
+            
             throw new Error(response.data.error);
         }
     } catch (error: any) {
