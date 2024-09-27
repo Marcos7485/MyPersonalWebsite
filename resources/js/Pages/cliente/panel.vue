@@ -185,6 +185,7 @@ const progressProject = computed(() => Number(props.project.progreso));
   animation: appear 2s 3s forwards;
 }
 
+
 .progress-bar-progreso {
   width: 110rem;
   height: 3rem;
