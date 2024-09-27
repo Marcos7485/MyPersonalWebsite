@@ -164,7 +164,7 @@ const progressProject = computed(() => Number(props.project.progreso));
 .item-mantenimiento {
   position: absolute;
   color: var(--color-base);
-  bottom: 5rem;
+  top: 60rem;
   right: 20%;
   text-align: center;
   opacity: 0;
@@ -178,7 +178,7 @@ const progressProject = computed(() => Number(props.project.progreso));
 .item-finalizado {
   position: absolute;
   color: var(--color-base);
-  bottom: 5rem;
+  top: 60rem;
   left: 20%;
   text-align: center;
   opacity: 0;
@@ -382,7 +382,7 @@ const progressProject = computed(() => Number(props.project.progreso));
 #figura4 img {
   position: absolute;
   width: 40rem;
-  bottom: 0;
+  top: 94.5vh;
   left: 30rem;
   opacity: 0;
   animation: appear 2s 1.4s forwards;
@@ -391,7 +391,7 @@ const progressProject = computed(() => Number(props.project.progreso));
 #figura3 img {
   position: absolute;
   width: 20rem;
-  bottom: 0;
+  top: 79.2vh;
   left: 0;
   opacity: 0;
   animation: appear 2s 1.8s forwards;
@@ -400,7 +400,7 @@ const progressProject = computed(() => Number(props.project.progreso));
 #figura2 img {
   position: absolute;
   width: 20rem;
-  bottom: 0;
+  top: 82.7vh;
   right: 0;
   opacity: 0;
   animation: appear 2s 1.2s forwards;
@@ -438,6 +438,7 @@ const progressProject = computed(() => Number(props.project.progreso));
 }
 
 .content {
+  height: 68rem;
   opacity: 0;
   animation: appear 3s forwards;
 }

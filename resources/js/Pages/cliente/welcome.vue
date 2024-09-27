@@ -276,13 +276,6 @@ const submitForm = async () => {
 
 @media (max-width: 600px) {
 
-    .desktop-video {
-        display: none;
-    }
-
-    .mobile-video {
-        display: block;
-    }
 
     .transition-video {
         width: 100%;
