@@ -67,8 +67,12 @@ const submitForm = async () => {
 
     <transition name="fade">
         <div v-if="showVideo" class="video-overlay">
-            <video ref="transitionVideo" @ended="onVideoEnd" autoplay class="transition-video">
+            <video ref="transitionVideo" @ended="onVideoEnd" autoplay class="transition-video desktop-video">
                 <source src="/public/images/cliente/video.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+            </video>
+            <video ref="transitionVideo" @ended="onVideoEnd" autoplay class="transition-video mobile-video">
+                <source src="/public/images/cliente/video-cel.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
             </video>
         </div>
@@ -113,6 +117,10 @@ const submitForm = async () => {
 </template>
 
 <style scoped>
+
+.mobile-video{
+    display: none;
+}
 
 .transition-video {
     width: 100%;
@@ -265,6 +273,14 @@ const submitForm = async () => {
 }
 
 @media (max-width: 600px) {
+
+    .desktop-video{
+        display: none;
+    }
+
+    .mobile-video{
+        display: block;
+    }
 
     .transition-video {
         width: 100%;
