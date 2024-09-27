@@ -53,6 +53,8 @@ const calculateProgress = (startDate: string, plazo: number) => {
 
 const progress = computed(() => calculateProgress(props.project.created_at, Number(props.project.plazo)));
 
+const progressProject = computed(() => Number(props.project.progreso));
+
 
 </script>
 
@@ -119,20 +121,34 @@ const progress = computed(() => calculateProgress(props.project.created_at, Numb
           <p>Valor Total: ${{ props.project.valor_total }}</p>
         </div>
 
+        <div class="item-progreso">
+          <h1>Progreso del proyecto</h1>
+          <div class="progress-bar-progreso">
+            <div class="progress-fill-progreso" :style="{ width: progressProject + '%' }">
+              <p>{{ progressProject.toFixed(2) }}%</p>
+            </div>
+          </div>
+        </div>
+
         <div class="item-plazo">
-          <p>Plazo de entrega del proyecto</p>
+          <h1>Plazo de entrega del proyecto</h1>
           <div class="progress-bar">
             <div class="progress-fill" :style="{ width: progress + '%' }">
               <p>{{ progress.toFixed(2) }}%</p>
             </div>
           </div>
-          <p> Plazo {{ getDaysPassed(props.project.created_at) > Number(props.project.plazo) ? props.project.plazo : getDaysPassed(props.project.created_at) }}/{{ props.project.plazo }} días</p>
+          <h1> Plazo {{ getDaysPassed(props.project.created_at) > Number(props.project.plazo) ? props.project.plazo :
+            getDaysPassed(props.project.created_at) }}/{{ props.project.plazo }} días</h1>
         </div>
 
-        <p>Plazo: </p>
-        <p>Progreso del proyecto: {{ props.project.progreso }} %</p>
-        <p>Finalizado: {{ props.project.finalizado }}</p>
-        <p>Mantenimiento: {{ props.project.mantenimiento }}</p>
+
+        <div class="item-finalizado">
+          <h1>Finalizado: {{ props.project.finalizado == null ? '-' : formatDate(props.project.finalizado) }}</h1>
+        </div>
+
+        <div class="item-mantenimiento">
+          <h1>Mantenimiento: ${{ props.project.mantenimiento }}/mes</h1>
+        </div>
       </div>
     </div>
   </div>
@@ -141,58 +157,138 @@ const progress = computed(() => calculateProgress(props.project.created_at, Numb
 
 <style scoped>
 
-.item-plazo p {
+.item-mantenimiento h1{
   color: white;
 }
 
-.item-plazo{
+.item-mantenimiento {
+  position: absolute;
+  color: var(--color-base);
+  bottom: 5rem;
+  right: 20%;
+  text-align: center;
+  opacity: 0;
+  animation: appear 2s 3s forwards;
+}
+
+.item-finalizado h1{
+  color: white;
+}
+
+.item-finalizado {
+  position: absolute;
+  color: var(--color-base);
+  bottom: 5rem;
+  left: 20%;
+  text-align: center;
+  opacity: 0;
+  animation: appear 2s 3s forwards;
+}
+
+.progress-bar-progreso {
+  width: 110rem;
+  height: 3rem;
+  background-color: #e0e0e0;
+  border-radius: 4rem 1rem;
+  overflow: hidden;
+}
+
+.progress-fill-progreso p {
+  color: black;
+  opacity: 0;
+  animation: appear 2s 3s forwards;
+}
+
+.progress-fill-progreso {
+  height: 100%;
+  background-color: goldenrod;
+  transition: width 0.5s;
+  opacity: 0;
+  animation: appear 2s 3s forwards;
+}
+
+.item-progreso h1 {
+  color: white;
+  opacity: 0;
+  animation: appear 2s 3s forwards;
+}
+
+.item-progreso {
   position: absolute;
   color: var(--color-base);
   top: 35rem;
   left: 15%;
   text-align: center;
+  opacity: 0;
+  animation: appear 2s 2.5s forwards;
+}
+
+.item-plazo h1 {
+  color: white;
+  opacity: 0;
+  animation: appear 2s 3s forwards;
+}
+
+.item-plazo {
+  position: absolute;
+  color: var(--color-base);
+  top: 45rem;
+  left: 15%;
+  text-align: center;
+  opacity: 0;
+  animation: appear 2s 2.5s forwards;
 }
 
 .progress-bar {
-    width: 100rem;
-    height: 3rem;
-    background-color: #e0e0e0;
-    border-radius: 4rem 1rem;
-    overflow: hidden;
+  width: 110rem;
+  height: 3rem;
+  background-color: #e0e0e0;
+  border-radius: 4rem 1rem;
+  overflow: hidden;
 }
 
-.progress-fill p{
+.progress-fill p {
   color: black;
+  opacity: 0;
+  animation: appear 2s 3s forwards;
 }
 
 .progress-fill {
-    height: 100%;
-    background-color: var(--color-first);
-    transition: width 0.5s;
+  height: 100%;
+  background-color: var(--color-first);
+  transition: width 0.5s;
+  opacity: 0;
+  animation: appear 2s 3s forwards;
 }
 
 .item-pago3 p {
   position: absolute;
   color: var(--color-base);
   top: 25rem;
-  left: 75%;
+  left: 74.5%;
   text-align: center;
+  opacity: 0;
+  animation: appear 2s 3s forwards;
 }
 
 .item-pago2 p {
   position: absolute;
   color: var(--color-base);
   top: 25rem;
-  left: 38%;
+  left: 37%;
   text-align: center;
+  opacity: 0;
+  animation: appear 2s 3s forwards;
 }
 
 .item-pago1 p {
   position: absolute;
   color: var(--color-base);
   top: 25rem;
-  left: 7rem;
+  left: 6rem;
   text-align: center;
+  opacity: 0;
+  animation: appear 2s 3s forwards;
 }
 
 .item-inicio h1 {
@@ -201,6 +297,8 @@ const progress = computed(() => calculateProgress(props.project.created_at, Numb
   top: 8rem;
   left: 65.5%;
   text-align: center;
+  opacity: 0;
+  animation: appear 2s 3s forwards;
 }
 
 
@@ -210,6 +308,8 @@ const progress = computed(() => calculateProgress(props.project.created_at, Numb
   top: 8rem;
   left: 33%;
   text-align: center;
+  opacity: 0;
+  animation: appear 2s 3s forwards;
 }
 
 .item-cliente h1 {
@@ -218,30 +318,38 @@ const progress = computed(() => calculateProgress(props.project.created_at, Numb
   top: 8rem;
   left: 7rem;
   text-align: center;
+  opacity: 0;
+  animation: appear 2s 3s forwards;
 }
 
 #figura10 img {
   position: absolute;
-  width: 45rem;
+  width: 40rem;
   height: 12rem;
   top: 20rem;
   left: 66%;
+  opacity: 0;
+  animation: appear 2s 2.5s forwards;
 }
 
 #figura9 img {
   position: absolute;
-  width: 45rem;
+  width: 40rem;
   height: 12rem;
   top: 20rem;
   left: 33%;
+  opacity: 0;
+  animation: appear 2s 2.5s forwards;
 }
 
 #figura8 img {
   position: absolute;
-  width: 45rem;
+  width: 40rem;
   height: 12rem;
   top: 20rem;
   left: 0;
+  opacity: 0;
+  animation: appear 2s 2.5s forwards;
 }
 
 #figura7 img {
@@ -249,6 +357,8 @@ const progress = computed(() => calculateProgress(props.project.created_at, Numb
   width: 40rem;
   top: 5rem;
   left: 60%;
+  opacity: 0;
+  animation: appear 2s 2.5s forwards;
 }
 
 #figura6 img {
@@ -256,14 +366,17 @@ const progress = computed(() => calculateProgress(props.project.created_at, Numb
   width: 40rem;
   top: 5rem;
   left: 30%;
+  opacity: 0;
+  animation: appear 2s 2.5s forwards;
 }
-
 
 #figura5 img {
   position: absolute;
   width: 40rem;
   top: 5rem;
   left: 0;
+  opacity: 0;
+  animation: appear 2s 2.5s forwards;
 }
 
 #figura4 img {
@@ -271,6 +384,8 @@ const progress = computed(() => calculateProgress(props.project.created_at, Numb
   width: 40rem;
   bottom: 0;
   left: 30rem;
+  opacity: 0;
+  animation: appear 2s 1.4s forwards;
 }
 
 #figura3 img {
@@ -278,6 +393,8 @@ const progress = computed(() => calculateProgress(props.project.created_at, Numb
   width: 20rem;
   bottom: 0;
   left: 0;
+  opacity: 0;
+  animation: appear 2s 1.8s forwards;
 }
 
 #figura2 img {
@@ -285,6 +402,8 @@ const progress = computed(() => calculateProgress(props.project.created_at, Numb
   width: 20rem;
   bottom: 0;
   right: 0;
+  opacity: 0;
+  animation: appear 2s 1.2s forwards;
 }
 
 #figura1 img {
@@ -292,6 +411,8 @@ const progress = computed(() => calculateProgress(props.project.created_at, Numb
   width: 20rem;
   top: 4rem;
   right: 0;
+  opacity: 0;
+  animation: appear 2s 1s forwards;
 }
 
 .banner img {
