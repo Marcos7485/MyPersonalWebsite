@@ -7,7 +7,7 @@ const languageStore = useLanguageStore();
 
 <template>
   <div class="whatsapp-container">
-    <a href="https://wa.me/542944820791?text=¡Hola!%20Quisiera%20más%20información" class="whatsapp-float"
+    <a href="https://wa.me/541136190245?text=¡Hola!%20Quisiera%20más%20información" class="whatsapp-float"
       target="_blank">
 
       <span class="whatsapp-text"  v-if="languageStore.languages === 'esp' || languageStore.languages.length === 0"><i class="fab fa-whatsapp whatsapp-icon"></i> Consulte!</span>
