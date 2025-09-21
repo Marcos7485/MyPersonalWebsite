@@ -34,62 +34,31 @@ const SoftwaresAnimate = (el: HTMLElement) => {
 <template>
     <section id="Softwares" v-intersect="SoftwaresAnimate">
         <div class="content-3">
+
+            <div class="slider">
+                <!-- <img v-if="!isMobile" :src="`${imageStore.imagePath}/seccion-3/icon-512x512.png`"> --> Slide de footos hablando del software y lo que hace.
+            </div>
+
             <div>
-                <h1 :class="{ active: SoftwaresObs }">Agenda</h1>
+                <a href="https://www.iqathleticsoftware.com" target="_blank"
+                    :class="{ active: SoftwaresObs }">www.iqathleticsoftware.com</a>
             </div>
-            <div id="texto-3" :class="{ active: SoftwaresObs }">
-                <p v-if="languageStore.languages === 'esp' || languageStore.languages.length === 0">¡Gestiona tu tiempo
-                    y tu negocio de manera eficiente!
-                    Nuestra aplicación ofrece una agenda personal ilimitada, permitiéndote organizar tus compromisos sin
-                    restricciones. Crea enlaces personalizados para compartir tus horarios con los clientes de forma
-                    práctica. Además, puedes generar un enlace general perfecto para promocionar tus servicios en las
-                    redes sociales. <br>
-                    ¡Si tienes un equipo, tenemos la solución ideal! Con nuestra herramienta, puedes crear tu propia
-                    empresa y añadir hasta 4 colaboradores. Ajusta los horarios de cada colaborador según las
-                    necesidades individuales y personaliza la presentación de cada uno. También ofrecemos la opción de
-                    generar un enlace empresarial, donde puedes mostrar a todo tu equipo en las redes sociales.
-                    Y para facilitar aún más la gestión, tus colaboradores tendrán acceso a una página personalizada
-                    donde podrán gestionar sus propios horarios y clientes de forma remota.
-                </p>
-                <p v-if="languageStore.languages === 'pt'">Gerencie seu tempo e seu negócio de forma eficiente!
-                    Nossa aplicação oferece uma agenda pessoal ilimitada, permitindo que você organize seus compromissos
-                    sem restrições. Crie links personalizados para compartilhar seus horários com os clientes de forma
-                    prática. Além disso, você pode gerar um link geral perfeito para promover seus serviços nas redes
-                    sociais. <br>
-                    Se você tem uma equipe, temos a solução ideal! Com nossa ferramenta, você pode criar sua própria
-                    empresa e adicionar até 4 colaboradores. Ajuste os horários de cada colaborador conforme as
-                    necessidades individuais e personalize a apresentação de cada um. Também oferecemos a opção de gerar
-                    um link empresarial, onde você pode mostrar toda a sua equipe nas redes sociais. E para facilitar
-                    ainda mais a gestão, seus colaboradores terão acesso a uma página personalizada onde poderão
-                    gerenciar seus próprios horários e clientes de forma remota.</p>
-                <p v-if="languageStore.languages === 'eng'">Manage your time and business efficiently!
-                    Our application offers an unlimited personal calendar, allowing you to organize your appointments
-                    without restrictions. Create customized links to share your schedules with clients conveniently.
-                    Additionally, you can generate a general link perfect for promoting your services on social media.
-                    <br>
-                    If you have a team, we have the ideal solution! With our tool, you can create your own company and
-                    add up to 4 collaborators. Adjust each collaborator's schedule according to their individual needs
-                    and customize their presentation. We also offer the option to generate a business link where you can
-                    showcase your entire team on social media. And to make management even easier, your collaborators
-                    will have access to a personalized page where they can manage their own schedules and clients
-                    remotely.
-                </p>
-            </div>
-            <div>
-                <a href="https://www.agendasoftware.online" target="_blank"
-                    :class="{ active: SoftwaresObs }">www.agendasoftware.online</a>
-            </div>
-            <div id="img-3" :class="{ active: SoftwaresObs }">
-                <img :src="`${imageStore.imagePath}/seccion-3/subtitle.webp`" alt="">
-            </div>
+
             <div id="img-4" :style="backgroundSoftware" :class="{ active: SoftwaresObs }">
-                <img v-if="!isMobile" :src="`${imageStore.imagePath}/seccion-3/agenda.webp`">
+                <img v-if="!isMobile" :src="`${imageStore.imagePath}/seccion-3/icon-512x512.png`">
             </div>
         </div>
     </section>
 </template>
 
 <style scoped>
+
+
+.slider img{
+    width: 70rem;
+    height: 70rem;
+}
+
 .content-3 a.active {
     animation: translateImgOposite 2s 1.5s forwards;
 }

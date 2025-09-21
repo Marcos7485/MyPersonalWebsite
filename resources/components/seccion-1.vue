@@ -26,30 +26,32 @@ const languageStore = useLanguageStore();
                     <h1 v-if="languageStore.languages === 'eng'">Developer</h1>
                     <p id="esp" v-if="languageStore.languages === 'esp' || languageStore.languages.length === 0">¡Hola!
                         Soy Marcos Gonzalez,
-                        soy un estudiante argentino de Ingeniería
-                        en Software en Brasil. Soy un apasionado de la tecnología y la
-                        programación
-                        de manera autodidacta, siempre en constante aprendizaje y desarrollo.<br><br>
-                        Me dedico a adaptar las nuevas tecnologías para ofrecer un código de alta calidad,
-                        priorizando las necesidades de mis clientes y asegurando su satisfacción.
+                        soy desarrollador web fullstack dedicado a realizar las soluciones mas eficientes a los
+                        problemas de todas las personas
+                        con un software que entiendan todas las personas.
+                        Menos es mas, solucionar es mejor que lucir, facilidad, no complejidad, si deberia decir la
+                        descripcion en una sola palabra
+                        es - eficiencia -.
                     </p>
 
                     <p v-if="languageStore.languages === 'pt'">
-                        Olá! Sou Marcos Gonzalez,
-                        sou um estudante argentino de Engenharia de Software no Brasil. Sou
-                        apaixonado por tecnologia e programação de forma autodidata, sempre em constante aprendizado e
-                        desenvolvimento.<br><br>
-                        Dedico-me a adaptar as novas tecnologias para oferecer um código de alta qualidade, priorizando
-                        as necessidades dos meus clientes e garantindo sua satisfação.
+                        Olá!
+                        Sou Marcos Gonzalez,
+                        sou desenvolvedor web fullstack dedicado a criar as soluções mais eficientes para os problemas
+                        de todas as pessoas,
+                        com um software que qualquer pessoa possa entender.
+                        Menos é mais, facilidade, não complexidade.
+                        Se eu tivesse que descrever em uma única palavra, seria - eficiência -.
                     </p>
 
                     <p v-if="languageStore.languages === 'eng'">
-                        Hello! I'm Marcos Gonzalez,
-                        I am an Argentine student of Software Engineering in Brazil. I am
-                        passionate about technology and programming in a self-taught manner, always in constant learning
-                        and development.<br><br>
-                        I focus on adapting new technologies to deliver high-quality code, prioritizing my clients'
-                        needs and ensuring their expectations.
+                        Hello!
+                        I'm Marcos Gonzalez,
+                        a full-stack web developer dedicated to creating the most efficient solutions to people's
+                        problems,
+                        with software that anyone can understand.
+                        Less is more, solving is better than showing off, simplicity over complexity.
+                        If I had to describe it in a single word, it would be - efficiency -.
                     </p>
                 </div>
             </div>
