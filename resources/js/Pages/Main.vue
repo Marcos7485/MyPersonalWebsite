@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, defineAsyncComponent, onMounted, onUnmounted, type Component } from 'vue'
 import Header from '../../components/HeaderView.vue'
 import Footer from '../../components/FooterView.vue'
 import Seccion1 from '../../components/seccion-1.vue'
 import Seccion5 from '../../components/seccion-5.vue'
 import Seccion6 from '../../components/seccion-6.vue'
-import AppDetalle from '../../components/AppDetalle.vue'
 import PageIntro from '../../components/PageIntro.vue'
 
 interface Review {
@@ -15,9 +14,23 @@ interface Review {
   opinion: string;
 }
 
-const props = defineProps<{ reviews: Review[] }>()
+export interface AppCard {
+  id: number
+  project: string
+  card: number
+  image: string
+  component: string
+  active: boolean
+  imageUrl: string
+  projectIconUrl: string
+}
 
-const activeAppId = ref<number | null>(null)
+const props = defineProps<{
+  reviews: Review[]
+  cards: AppCard[]
+}>()
+
+const activeCard = ref<AppCard | null>(null)
 const isEntering = ref(false)
 
 /** Un solo dragón en Header: loading (centro) → docking → done */
@@ -26,6 +39,26 @@ const introActive = ref(true)
 const revealPage = ref(false)
 
 let enterTimer: ReturnType<typeof setTimeout> | null = null
+
+/** Carga directa: cards/{project}/{component}.vue según la BD */
+const cardModules = import.meta.glob('../../components/cards/**/*.vue') as Record<
+  string,
+  () => Promise<{ default: Component }>
+>
+
+const activeCardView = computed(() => {
+  const card = activeCard.value
+  if (!card) return null
+
+  const key = `../../components/cards/${card.project}/${card.component}.vue`
+  const loader = cardModules[key]
+  if (!loader) {
+    console.warn(`[Main] No se encontró ${key}`)
+    return null
+  }
+
+  return defineAsyncComponent(loader)
+})
 
 const goToFirstSection = () => {
   if (window.location.hash) {
@@ -36,20 +69,20 @@ const goToFirstSection = () => {
   document.body.scrollTop = 0
 }
 
-const onEnterApp = (appId: number) => {
-  if (isEntering.value || activeAppId.value !== null || introPhase.value !== 'done') return
+const onEnterApp = (card: AppCard) => {
+  if (isEntering.value || activeCard.value !== null || introPhase.value !== 'done') return
 
   isEntering.value = true
   document.body.style.overflow = 'hidden'
 
   enterTimer = setTimeout(() => {
-    activeAppId.value = appId
+    activeCard.value = card
     isEntering.value = false
   }, 900)
 }
 
 const closeApp = () => {
-  activeAppId.value = null
+  activeCard.value = null
   isEntering.value = false
   document.body.style.overflow = ''
 }
@@ -59,8 +92,6 @@ const onIntroLoaded = () => {
 }
 
 const onDockNearEnd = () => {
-  // Solo revelar el velo; el overflow se restaura al terminar el dock
-  // para no mover el layout (scrollbar) a mitad de la animación
   revealPage.value = true
   goToFirstSection()
 }
@@ -100,14 +131,14 @@ onUnmounted(() => {
     <div
         class="site-world"
         :class="{ 'is-shrinking': isEntering }"
-        v-show="activeAppId === null"
+        v-show="activeCard === null"
     >
         <Header
             :intro-phase="introPhase"
             @dock-near-end="onDockNearEnd"
             @dock-done="onDockDone"
         />
-        <Seccion1 @enter-app="onEnterApp"></Seccion1>
+        <Seccion1 :cards="props.cards" @enter-app="onEnterApp"></Seccion1>
         <Seccion5 :reviews="props.reviews"></Seccion5>
         <Seccion6></Seccion6>
         <Footer></Footer>
@@ -125,7 +156,12 @@ onUnmounted(() => {
         </div>
     </Teleport>
 
-    <AppDetalle v-if="activeAppId !== null" @close="closeApp" />
+    <component
+        :is="activeCardView"
+        v-if="activeCard && activeCardView"
+        :card="activeCard"
+        @close="closeApp"
+    />
 </template>
 
 <style scoped>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ReviewRequest;
 use App\Models\Projects;
 use App\Models\Reviews;
+use App\Models\cards;
 use Inertia\Inertia;
 
 class ReviewsController extends Controller
@@ -12,11 +13,25 @@ class ReviewsController extends Controller
 
     public function index()
     {
-
         $reviews = Reviews::where('stars', '>=', 4)->get();
 
+        $cards = cards::active()
+            ->orderBy('card')
+            ->get()
+            ->map(fn (cards $card) => [
+                'id' => $card->id,
+                'project' => $card->project,
+                'card' => $card->card,
+                'image' => $card->image,
+                'component' => $card->component,
+                'active' => $card->active,
+                'imageUrl' => $card->image_url,
+                'projectIconUrl' => $card->project_icon_url,
+            ]);
+
         return Inertia::render('Main', [
-            'reviews' => $reviews
+            'reviews' => $reviews,
+            'cards' => $cards,
         ]);
     }
 
