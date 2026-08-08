@@ -5,6 +5,9 @@ export default {
     reviews: 'Reviews',
     contact: 'Contact',
   },
+  hero: {
+    tagline: 'Are you ready?...',
+  },
   about: {
     button: 'About the developer',
     title: 'Developer',

@@ -111,10 +111,11 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
+/* --splash-bottom lo publica el header: borde inferior real del dragón */
 .page-intro-bar-wrap {
   position: fixed;
   left: 50%;
-  top: calc(50% + min(22rem, 30vw));
+  top: calc(var(--splash-bottom, 50vh) + 3rem);
   transform: translateX(-50%);
   z-index: 100003;
   width: min(28rem, 55vw);
@@ -154,7 +155,7 @@ onUnmounted(() => {
 
 @media (max-width: 600px) {
   .page-intro-bar-wrap {
-    top: calc(50% + min(18rem, 36vw));
+    top: calc(var(--splash-bottom, 50vh) + 2.4rem);
     width: min(24rem, 70vw);
   }
 }

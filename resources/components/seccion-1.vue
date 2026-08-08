@@ -8,94 +8,49 @@ export interface AppCard {
     project: string
     card: number
     image: string
-    component: string
+    hover_text: string | null
+    descripcion: string | null
+    component: string | null
     active: boolean
     imageUrl: string
     projectIconUrl: string
 }
 
-type CardSlot =
-    | { slot: number; type: 'empty'; id: string }
-    | (AppCard & { slot: number; type: 'app' })
-
-const props = defineProps<{
-    cards: AppCard[]
-}>()
+const props = withDefaults(defineProps<{
+    cards?: AppCard[]
+}>(), {
+    cards: () => [],
+})
 
 const imageStore = useImageStore();
 const languageStore = useLanguageStore();
 
-/** 3 posiciones; `card` de la DB = slot 1..3 */
-const apps = computed<CardSlot[]>(() =>
-    [1, 2, 3].map((slot) => {
-        const row = props.cards.find((c) => Number(c.card) === slot)
-        if (!row) {
-            return { slot, type: 'empty' as const, id: `empty-${slot}` }
-        }
-        return { ...row, slot, type: 'app' as const }
-    }),
-)
+const aboutOpen = ref(false);
 
 const arcBrand = computed(() => {
     const first = props.cards[0]
-    if (!first) return null
+    if (first) {
+        return {
+            src: first.projectIconUrl,
+            alt: first.project,
+        }
+    }
     return {
-        src: first.projectIconUrl,
-        alt: first.project,
+        src: `${imageStore.imagePath || '/images'}/iqathletic/icon.png`,
+        alt: 'iqathletic',
     }
 })
 
-const emit = defineEmits<{
-    'enter-app': [card: AppCard];
-}>();
-
-const aboutOpen = ref(false);
-const hoveredIndex = ref<number | null>(null);
-const selectedIndex = ref<number | null>(null);
-
-const selectedApp = computed(() => {
-    if (selectedIndex.value === null) return null
-    return apps.value[selectedIndex.value]
-});
-
-const onCardEnter = (index: number) => {
-    if (selectedIndex.value !== null) return;
-    hoveredIndex.value = index;
-};
-
-const onCardLeave = (index: number) => {
-    if (hoveredIndex.value === index) {
-        hoveredIndex.value = null;
-    }
-};
-
-const selectCard = (index: number) => {
-    if (selectedIndex.value === index) return;
-    selectedIndex.value = index;
-    hoveredIndex.value = null;
-};
-
-const deselectCard = () => {
-    selectedIndex.value = null;
-};
-
-const openAppDetail = () => {
-    const app = selectedApp.value
-    if (!app || app.type !== 'app') return
-    emit('enter-app', app);
-};
-
-const toggleAbout = () => {
-    aboutOpen.value = !aboutOpen.value;
-};
-
 const uiLabels = computed(() => ({
-    moreInfo: languageStore.t('cards.moreInfo'),
-    back: languageStore.t('cards.back'),
+    heroTagline: languageStore.t('hero.tagline'),
     aboutButton: languageStore.t('about.button'),
     aboutTitle: languageStore.t('about.title'),
     aboutBody: languageStore.t('about.body'),
 }));
+
+const toggleAbout = () => {
+    aboutOpen.value = !aboutOpen.value;
+};
 
 onMounted(() => {
     imageStore.fetchImagePath();
@@ -104,52 +59,60 @@ onMounted(() => {
 
 <template>
     <section id="Home" class="hero">
+        <div class="hero-bg" aria-hidden="true">
+            <img
+                :src="`${imageStore.imagePath}/seccion-1/fondo.png`"
+                alt=""
+                class="hero-bg-img"
+            >
+        </div>
+
         <div class="atmosphere" aria-hidden="true">
             <div class="glow glow-a"></div>
             <div class="glow glow-b"></div>
             <div class="vignette"></div>
         </div>
 
-        <div class="hero-inner">
-            <div class="stage" :class="{ 'has-selection': selectedIndex !== null }">
-                <div class="cards-row">
-                    <article
-                        v-for="(app, index) in apps"
-                        :key="app.id"
-                        class="card"
-                        :class="{
-                            'is-app': app.type === 'app',
-                            'is-empty': app.type === 'empty',
-                            hovered: hoveredIndex === index && selectedIndex === null,
-                            dimmed: selectedIndex !== null,
-                        }"
-                        @pointerenter="onCardEnter(index)"
-                        @pointerleave="onCardLeave(index)"
-                        @click="selectCard(index)"
-                    >
-                        <div class="card-face">
-                            <img
-                                v-if="app.type === 'app'"
-                                :src="app.imageUrl"
-                                :alt="app.project"
-                                class="card-image"
-                            >
+        <div class="hero-deco hero-deco--left" aria-hidden="true">
+            <video
+                class="hero-deco-video"
+                :src="`${imageStore.imagePath}/seccion-1/video1.mp4`"
+                autoplay
+                muted
+                loop
+                playsinline
+            ></video>
+        </div>
 
-                            <div v-else class="card-empty">
-                                <span class="card-ghost"></span>
-                                <span class="card-ghost short"></span>
-                                <span class="card-ghost shorter"></span>
-                            </div>
-                        </div>
-                    </article>
+        <div class="hero-deco hero-deco--right" aria-hidden="true">
+            <img
+                :src="`${imageStore.imagePath}/seccion-1/1.png`"
+                alt=""
+                class="hero-deco-img"
+            >
+        </div>
+
+        <div class="hero-inner">
+            <div class="stage">
+                <!-- Hueco de las cards: ancla del único dragón (Header lo teleporta aquí) -->
+                <div class="cards-row">
+                    <div class="dragon-block">
+                        <div id="dragon-dock" class="dragon-dock"></div>
+                        <p class="dragon-tagline">{{ uiLabels.heroTagline }}</p>
+                    </div>
                 </div>
 
-                <div v-if="arcBrand" class="arc-brand">
-                    <img
-                        :src="arcBrand.src"
-                        :alt="arcBrand.alt"
-                        class="arc-brand-logo"
-                    >
+                <div class="arc-brand">
+                    <div class="arc-brand-mark">
+                        <img
+                            :src="arcBrand.src"
+                            :alt="arcBrand.alt"
+                            class="arc-brand-logo"
+                        >
+                        <span class="arc-brand-shine-clip" aria-hidden="true">
+                            <span class="arc-brand-shine"></span>
+                        </span>
+                    </div>
                     <a
                         href="https://www.iqathleticsoftware.com"
                         class="arc-brand-link"
@@ -193,54 +156,6 @@ onMounted(() => {
             </div>
         </div>
     </section>
-
-    <Teleport to="body">
-        <Transition name="card-modal">
-            <div v-if="selectedApp" class="card-modal-root">
-                <div
-                    class="card-modal-backdrop"
-                    @click="deselectCard"
-                ></div>
-                <article
-                    class="card selected is-app"
-                    :class="{ 'is-empty': selectedApp.type === 'empty' }"
-                >
-                    <div class="card-face">
-                        <button
-                            type="button"
-                            class="card-back"
-                            @click.stop="deselectCard"
-                        >
-                            <i class="fa-solid fa-arrow-left"></i>
-                            <span>{{ uiLabels.back }}</span>
-                        </button>
-
-                        <img
-                            v-if="selectedApp.type === 'app'"
-                            :src="selectedApp.imageUrl"
-                            :alt="selectedApp.project"
-                            class="card-image"
-                        >
-
-                        <div v-else class="card-empty">
-                            <span class="card-ghost"></span>
-                            <span class="card-ghost short"></span>
-                            <span class="card-ghost shorter"></span>
-                        </div>
-
-                        <button
-                            v-if="selectedApp.type === 'app'"
-                            type="button"
-                            class="card-banner"
-                            @click.stop="openAppDetail"
-                        >
-                            {{ uiLabels.moreInfo }}
-                        </button>
-                    </div>
-                </article>
-            </div>
-        </Transition>
-    </Teleport>
 </template>
 
 <style scoped>
@@ -252,17 +167,36 @@ onMounted(() => {
     min-height: 64rem;
     margin-top: -5rem;
     overflow: hidden;
-    background:
-        radial-gradient(ellipse 70% 50% at 50% 45%, rgba(14, 40, 78, 0.5), transparent 65%),
-        linear-gradient(180deg, #050b14 0%, #02060c 55%, #010308 100%);
+    background: #02060c;
     color: white;
     animation: appear 1.2s ease forwards;
+}
+
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.hero-bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    display: block;
+    opacity: 0.9;
 }
 
 .atmosphere {
     position: absolute;
     inset: 0;
+    z-index: 0;
     pointer-events: none;
+    background:
+        radial-gradient(ellipse 70% 50% at 50% 40%, rgba(8, 24, 48, 0.35), transparent 65%),
+        linear-gradient(180deg, rgba(2, 6, 12, 0.35) 0%, rgba(2, 6, 12, 0.55) 55%, rgba(1, 3, 8, 0.78) 100%);
 }
 
 .glow {
@@ -297,6 +231,63 @@ onMounted(() => {
     box-shadow: inset 0 0 10rem rgba(0, 8, 20, 0.85);
 }
 
+.hero-deco {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: min(40vw, 46rem);
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.hero-deco--left {
+    left: 0;
+    -webkit-mask-image: linear-gradient(
+        to right,
+        #000 0%,
+        #000 42%,
+        transparent 92%
+    );
+    mask-image: linear-gradient(
+        to right,
+        #000 0%,
+        #000 42%,
+        transparent 92%
+    );
+}
+
+.hero-deco--right {
+    right: 0;
+    -webkit-mask-image: linear-gradient(
+        to left,
+        #000 0%,
+        #000 42%,
+        transparent 92%
+    );
+    mask-image: linear-gradient(
+        to left,
+        #000 0%,
+        #000 42%,
+        transparent 92%
+    );
+}
+
+.hero-deco-img,
+.hero-deco-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    opacity: 0.72;
+    filter: saturate(0.92) contrast(1.05);
+    display: block;
+}
+
+.hero-deco-img {
+    object-position: 55% 20%;
+}
+
 .hero-inner {
     position: relative;
     z-index: 2;
@@ -324,11 +315,39 @@ onMounted(() => {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     gap: 4rem;
     width: 100%;
     z-index: 2;
     padding-top: 1.5rem;
+    /* Misma altura aproximada que tenían las 3 cards (26rem + arco) */
+    min-height: 30rem;
+    box-sizing: border-box;
+}
+
+.dragon-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+    width: min(34rem, 58vw);
+}
+
+.dragon-dock {
+    width: 100%;
+    min-height: min(20rem, 34vw);
+    display: grid;
+    place-items: center;
+}
+
+.dragon-tagline {
+    margin: 0;
+    text-align: center;
+    font-family: var(--familyTitles), Georgia, serif;
+    font-size: clamp(1.8rem, 2.4vw, 2.6rem);
+    letter-spacing: 0.04em;
+    color: rgba(230, 236, 248, 0.9);
+    text-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.55);
 }
 
 .arc-brand {
@@ -345,12 +364,70 @@ onMounted(() => {
     pointer-events: none;
 }
 
+.arc-brand-mark {
+    position: relative;
+    display: inline-block;
+}
+
 .arc-brand-logo {
     width: 9rem;
     height: auto;
     display: block;
     filter: drop-shadow(0 0.35rem 0.8rem rgba(0, 0, 0, 0.55));
     opacity: 0.92;
+}
+
+/* Ventana central: el brillo solo se ve en el medio del logo */
+.arc-brand-shine-clip {
+    position: absolute;
+    left: 10%;
+    right: 1%;
+    top: 35%;
+    bottom: 10%;
+    border-radius: .5rem 1rem 0 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.arc-brand-shine {
+    position: absolute;
+    inset: -15% auto -15% 0;
+    width: 45%;
+    background: linear-gradient(
+        100deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 35%,
+        rgba(255, 220, 220, 0.5) 50%,
+        rgba(255, 255, 255, 0.1) 65%,
+        transparent 100%
+    );
+    pointer-events: none;
+    opacity: 0;
+    mix-blend-mode: screen;
+    animation: iqShineSweep 4.2s 0.8s ease-in-out infinite;
+}
+
+@keyframes iqShineSweep {
+    0% {
+        transform: translateX(-120%) skewX(-18deg);
+        opacity: 0;
+    }
+    12% { opacity: 0.8; }
+    35% {
+        transform: translateX(220%) skewX(-18deg);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(220%) skewX(-18deg);
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .arc-brand-shine {
+        animation: none !important;
+        opacity: 0;
+    }
 }
 
 .arc-brand-link {
@@ -370,12 +447,15 @@ onMounted(() => {
 
 .card {
     position: relative;
-    width: 18rem;
+    /* Misma proporción que card1.png (1080x1920) para que la img no se corte */
     height: 26rem;
+    width: calc(26rem * 1080 / 1920);
+    aspect-ratio: 1080 / 1920;
     flex: 0 0 auto;
     box-sizing: border-box;
     cursor: pointer;
-    border-radius: 1.6rem;
+    border-radius: 1rem;
+    overflow: hidden;
     transform-origin: 50% 100%;
     transition:
         transform 0.35s cubic-bezier(0.22, 0.85, 0.28, 1),
@@ -441,11 +521,14 @@ onMounted(() => {
     transform: translate(-50%, -50%) scale(1);
     transform-origin: center center;
     cursor: default;
-    width: min(92vw, 110rem);
-    height: min(78vh, 64rem);
+    width: min(92vw, 96rem);
+    height: min(80vh, 56rem);
+    max-height: 80vh;
+    aspect-ratio: unset;
     border-radius: 1.4rem;
     z-index: 2;
     pointer-events: auto;
+    overflow: hidden;
 }
 
 .card-modal-enter-active,
@@ -477,19 +560,20 @@ onMounted(() => {
 
 /* El resaltado va en la cara: el hitbox del .card NO se mueve */
 .card-face {
-    position: relative;
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-    border-radius: 1.6rem;
+    border-radius: 1rem;
     background: linear-gradient(165deg, #424956 0%, #262b34 55%, #1a1e26 100%);
     border: 1px solid rgba(180, 190, 205, 0.16);
-    padding: 1.8rem;
+    padding: 0;
     display: flex;
     flex-direction: column;
     align-items: stretch;
     justify-content: flex-start;
-    gap: 1rem;
+    gap: 0;
     overflow: hidden;
     filter: brightness(0.82);
     box-shadow:
@@ -505,51 +589,112 @@ onMounted(() => {
 
 .card.selected .card-face {
     pointer-events: auto;
-    filter: brightness(1.12);
+    filter: none;
     border-color: rgba(140, 185, 255, 0.55);
-    background: linear-gradient(165deg, #545d6c 0%, #323944 55%, #222831 100%);
+    background: #0a0a0a;
     box-shadow:
         0 2.8rem 5rem rgba(0, 0, 0, 0.8),
         0 0 3.5rem rgba(40, 110, 200, 0.45),
         0 0 1.5rem rgba(170, 24, 24, 0.2);
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    grid-template-rows: auto 1fr;
-    gap: 1.2rem 1.4rem;
-    padding: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
     border-radius: 1.4rem;
-    align-items: center;
+    overflow: hidden;
 }
 
 .card.selected .card-back {
-    grid-column: 1;
-    grid-row: 1;
+    position: absolute;
+    top: 1.4rem;
+    left: 1.4rem;
+    z-index: 5;
     width: auto;
-    justify-self: start;
 }
 
-.card.selected .card-banner {
-    grid-column: 3;
-    grid-row: 1;
-    width: auto;
-    min-width: 16rem;
-    justify-self: end;
-    margin: 0;
-}
-
-.card.selected .card-image,
-.card.selected .card-empty {
-    grid-column: 1 / -1;
-    grid-row: 2;
+.modal-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 42%) minmax(0, 58%);
     width: 100%;
     height: 100%;
     min-height: 0;
-    align-self: stretch;
+    flex: 1 1 auto;
 }
 
-.card.selected .card-image {
-    flex: unset;
-    max-height: none;
+.modal-media {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: 2.4rem 1.6rem 2.4rem 2.4rem;
+    box-sizing: border-box;
+    overflow: hidden;
+    background: #070b12;
+}
+
+.modal-image {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center;
+    border-radius: 1rem;
+}
+
+.modal-copy {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    height: 100%;
+    padding: 3.5rem 3rem;
+    box-sizing: border-box;
+    overflow: hidden;
+    background: linear-gradient(165deg, #1a2030 0%, #0c1018 100%);
+}
+
+.modal-copy-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    width: 100%;
+    max-width: 48rem;
+    max-height: 100%;
+    overflow-y: auto;
+    text-align: center;
+    padding-right: 0.4rem;
+}
+
+.modal-description {
+    margin: 0;
+    color: rgba(232, 238, 248, 0.92);
+    font-family: var(--familyTitles);
+    font-size: clamp(1.5rem, 1.6vw, 2rem);
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.card.selected .card-banner {
+    position: relative;
+    top: auto;
+    right: auto;
+    z-index: 1;
+    width: auto;
+    min-width: 16rem;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.card.selected .card-empty {
+    width: 100%;
+    height: 100%;
 }
 
 .card-face::before {
@@ -573,9 +718,8 @@ onMounted(() => {
 }
 
 .card.hovered .card-face {
-    filter: brightness(1.1);
+    filter: none;
     border-color: rgba(140, 185, 255, 0.5);
-    background: linear-gradient(165deg, #505868 0%, #2f3642 55%, #20252e 100%);
     box-shadow:
         0 2.4rem 4.2rem rgba(0, 0, 0, 0.72),
         0 0 2.8rem rgba(40, 110, 200, 0.35),
@@ -627,28 +771,94 @@ onMounted(() => {
     position: relative;
     z-index: 1;
     width: 100%;
+    height: 100%;
     min-height: 0;
     display: flex;
     flex-direction: column;
     gap: 1.2rem;
     flex: 1 1 auto;
     justify-content: center;
+    padding: 1.8rem;
+    box-sizing: border-box;
 }
 
 .card-image {
-    position: relative;
+    position: absolute;
+    inset: 0;
     z-index: 1;
     width: 100%;
-    min-height: 0;
-    flex: 1 1 auto;
-    object-fit: contain;
+    height: 100%;
+    object-fit: cover;
     object-position: center;
-    border-radius: 0.9rem;
+    border-radius: inherit;
     display: block;
+    transform: scale(1);
+    filter: brightness(1);
+    transition:
+        transform 0.5s cubic-bezier(0.22, 0.85, 0.28, 1),
+        filter 0.45s ease;
+}
+
+.card-hover-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.8rem;
+    box-sizing: border-box;
+    background: rgba(2, 6, 12, 0.45);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.card-hover-text {
+    margin: 0;
+    color: #f4f7fc;
+    text-align: center;
+    font-family: var(--familyTitles);
+    font-size: 1.7rem;
+    line-height: 1.35;
+    letter-spacing: 0.02em;
+    text-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.65);
+    transform: translateY(1rem) scale(0.96);
+    opacity: 0;
+    transition:
+        transform 0.45s cubic-bezier(0.22, 0.85, 0.28, 1),
+        opacity 0.35s ease;
+}
+
+.card.is-app.hovered .card-image {
+    transform: scale(1.14);
+    filter: brightness(0.42);
+}
+
+.card.is-app.hovered .card-hover-layer {
+    opacity: 1;
+}
+
+.card.is-app.hovered .card-hover-text {
+    transform: translateY(0) scale(1);
+    opacity: 1;
 }
 
 .card.is-app .card-face {
-    padding: 1rem;
+    padding: 0;
+    filter: none;
+    background: #0a0a0a;
+    overflow: hidden;
+}
+
+.card.is-app .card-face::before,
+.card.is-app .card-face::after {
+    display: none;
+}
+
+.card.is-app.hovered .card-face {
+    filter: none;
+    background: #0a0a0a;
 }
 
 .card-banner {
@@ -841,27 +1051,13 @@ onMounted(() => {
         padding: 14rem 1.5rem 3rem;
     }
 
-    .cards-row {
-        gap: 2.8rem;
+    .hero-deco {
+        width: min(48vw, 34rem);
+        opacity: 0.85;
     }
 
-    .cards-row .card:nth-child(1),
-    .cards-row .card:nth-child(3) {
-        transform: rotate(-8deg) translateY(1.6rem);
-    }
-
-    .cards-row .card:nth-child(3) {
-        transform: rotate(8deg) translateY(1.6rem);
-    }
-
-    .card {
-        width: 15rem;
-        height: 22rem;
-    }
-
-    .card.selected {
-        width: min(94vw, 72rem);
-        height: min(72vh, 48rem);
+    .dragon-block {
+        width: min(32rem, 66vw);
     }
 
     .arc-brand-logo {
@@ -870,12 +1066,6 @@ onMounted(() => {
 
     .arc-brand-link {
         font-size: 1.6rem;
-    }
-
-    .card-back,
-    .card-banner {
-        font-size: 1.15rem;
-        padding: 0.65rem 0.75rem;
     }
 
     .about-panel-inner {
@@ -893,62 +1083,106 @@ onMounted(() => {
 }
 
 @media (max-width: 600px) {
+    /* El header ya no reserva alto: el hero arranca pegado arriba */
     .hero {
-        margin-top: -3rem;
-        min-height: 78rem;
+        margin-top: 0;
+        min-height: 64rem;
     }
 
     .hero-inner {
-        min-height: 78rem;
-        padding-top: 14.5rem;
+        min-height: 64rem;
+        gap: 1.6rem;
+        padding: 15rem 1.5rem 4rem;
+    }
+
+    .stage {
+        gap: 2rem;
+    }
+
+    /* El fondo llena todo el hero, sin que el viñeteo lo coma en los bordes */
+    .hero-bg,
+    .hero-bg-img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .hero-bg-img {
+        object-fit: cover;
+        object-position: center center;
+        opacity: 1;
+    }
+
+    .atmosphere {
+        background:
+            radial-gradient(ellipse 90% 45% at 50% 35%, rgba(8, 24, 48, 0.28), transparent 70%),
+            linear-gradient(180deg, rgba(2, 6, 12, 0.28) 0%, rgba(2, 6, 12, 0.42) 55%, rgba(1, 3, 8, 0.62) 100%);
+    }
+
+    .vignette {
+        background: radial-gradient(ellipse at center, transparent 62%, rgba(0, 0, 0, 0.6) 100%);
+        box-shadow: inset 0 0 5rem rgba(0, 8, 20, 0.6);
+    }
+
+    /* Decoración: bandas laterales angostas y acotadas en alto, para que no
+       tapen el dragón ni la zona del botón de abajo */
+    .hero-deco {
+        width: 50vw;
+    }
+
+    /* Video: cubre todo el lado izquierdo */
+    .hero-deco--left {
+        top: 0;
+        bottom: 0;
+        height: auto;
+        -webkit-mask-image: linear-gradient(to right, #000 0%, #000 22%, transparent 82%);
+        mask-image: linear-gradient(to right, #000 0%, #000 22%, transparent 82%);
+    }
+
+    /* Imagen: arriba a la derecha */
+    .hero-deco--right {
+        top: 0;
+        bottom: auto;
+        height: 58%;
+        -webkit-mask-image: linear-gradient(to left, #000 0%, #000 22%, transparent 82%);
+        mask-image: linear-gradient(to left, #000 0%, #000 22%, transparent 82%);
+    }
+
+    .hero-deco-img,
+    .hero-deco-video {
+        opacity: 0.34;
+    }
+
+    .hero-deco-video {
+        object-position: 35% center;
+    }
+
+    .hero-deco-img {
+        object-position: 70% 12%;
     }
 
     .cards-row {
         gap: 2rem;
+        padding-top: 0;
+        min-height: 0;
     }
 
-    .cards-row .card:nth-child(1) {
-        transform: rotate(-6deg) translateY(1.2rem);
+    .dragon-block {
+        width: min(30rem, 78vw);
+        gap: 0.8rem;
     }
 
-    .cards-row .card:nth-child(3) {
-        transform: rotate(6deg) translateY(1.2rem);
+    .dragon-dock {
+        min-height: min(16rem, 44vw);
     }
 
-    .card {
-        width: 13rem;
-        height: 19rem;
+    .dragon-tagline {
+        font-size: clamp(1.6rem, 5vw, 2.1rem);
     }
 
-    .card.selected {
-        width: min(96vw, 42rem);
-        height: min(78vh, 58rem);
-    }
-
-    .card.selected .card-face {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto 1fr;
-        gap: 1rem;
-    }
-
-    .card.selected .card-back {
-        grid-column: 1;
-        grid-row: 1;
-        width: 100%;
-    }
-
-    .card.selected .card-banner {
-        grid-column: 1;
-        grid-row: 2;
-        width: 100%;
-        min-width: 0;
-        justify-self: stretch;
-    }
-
-    .card.selected .card-image,
-    .card.selected .card-empty {
-        grid-column: 1;
-        grid-row: 3;
+    .arc-brand {
+        gap: 0.4rem;
     }
 
     .arc-brand-logo {
@@ -959,10 +1193,26 @@ onMounted(() => {
         font-size: 1.35rem;
     }
 
-    .card-back,
-    .card-banner {
-        font-size: 1.05rem;
-        padding: 0.55rem 0.65rem;
+    .about {
+        width: 100%;
+    }
+
+    .about-trigger {
+        font-size: 1.4rem;
+        padding: 1.1rem 1.4rem;
+        gap: 0.8rem;
+    }
+
+    .about-panel-inner {
+        gap: 1.6rem;
+    }
+
+    .about-panel.open .about-panel-inner {
+        padding: 1.8rem 1.4rem;
+    }
+
+    .about-photo img {
+        width: 12rem;
     }
 }
 </style>

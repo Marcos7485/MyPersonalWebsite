@@ -15,9 +15,11 @@ class cards extends Model
         'project',
         'card',
         'image',
+        'hover_text',
         'component',
+        'descripcion',
         'active',
-    ];
+    ];  
 
     protected $casts = [
         'card' => 'integer',

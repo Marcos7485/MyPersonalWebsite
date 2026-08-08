@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
-import { useLanguageStore } from '../store/language';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { useImageStore } from '../store/imageStore';
 import LanguagesSelector from './LanguagesSelector.vue';
 
 const props = withDefaults(defineProps<{
-  /** loading: centro | docking: viaja a su lugar | done: quieto */
+  /** loading: splash | docking: ajuste leve | done: quieto en #dragon-dock */
   introPhase?: 'loading' | 'docking' | 'done'
 }>(), {
   introPhase: 'done',
@@ -19,34 +18,32 @@ const emit = defineEmits<{
 const imageStore = useImageStore();
 imageStore.fetchImagePath();
 
-const languageStore = useLanguageStore();
-
 const isMobile = ref(window.innerWidth <= 600);
-const MenuIsActive = ref(false);
 const isReady = ref(false);
 const logoRef = ref<HTMLElement | null>(null);
 const logoAnchorRef = ref<HTMLElement | null>(null);
-/** Tras el fade-out del vuelo: reaparece suave en el header */
 const logoSettling = ref(false);
 
-const DOCK_MS = 1200
-const FADE_OUT_AT = 0.58
-const FADE_OUT_MS = 420
-/** Espera a que terminen letras/nav; el dragón es lo último */
-const LOGO_APPEAR_DELAY_MS = 1900
+/** Un solo dragón: body en intro, #dragon-dock al terminar */
+const logoTeleportTarget = computed(() =>
+  props.introPhase === 'done' ? '#dragon-dock' : 'body',
+)
+
+/** Destino casi en el mismo sitio: solo un leve ajuste de tamaño */
+const DOCK_MS = 680
+const REVEAL_AT = 0.35
 
 let nearTimer: ReturnType<typeof setTimeout> | null = null
 let doneTimer: ReturnType<typeof setTimeout> | null = null
-let appearTimer: ReturnType<typeof setTimeout> | null = null
 
-const t = (key: string) => languageStore.t(key)
 const updateLayout = () => {
   isMobile.value = window.innerWidth <= 600;
-  if (!isMobile.value) MenuIsActive.value = false;
+  if (props.introPhase === 'loading') placeSplash()
 };
 
-const menuMobile = () => {
-  MenuIsActive.value = !MenuIsActive.value;
+/** Publica el borde inferior del dragón para que la barra de carga lo siga */
+const publishSplashBottom = (bottom: number) => {
+  document.documentElement.style.setProperty('--splash-bottom', `${bottom}px`)
 };
 
 const getScrollbarWidth = () => {
@@ -76,7 +73,29 @@ const clearLogoInline = () => {
   el.style.opacity = ''
 }
 
-/** Centro de pantalla, por encima del velo negro (Teleport a body) */
+const getDockAnchor = () => {
+  return document.getElementById('dragon-dock') || logoAnchorRef.value
+}
+
+const getDockTarget = (anchor: HTMLElement) => {
+  const rect = anchor.getBoundingClientRect()
+  const currentSb = window.innerWidth - document.documentElement.clientWidth
+  const realSb = getScrollbarWidth()
+  const compensate = Math.max(0, realSb - currentSb)
+
+  return {
+    left: rect.left - compensate,
+    top: rect.top,
+    width: rect.width,
+    centerX: rect.left + rect.width / 2 - compensate,
+    centerY: rect.top + rect.height / 2,
+  }
+}
+
+/**
+ * Splash del dragón: en móvil al centro de la pantalla, en desktop ya sobre el
+ * dock para que después casi no viaje.
+ */
 const placeSplash = async () => {
   await nextTick()
   await nextTick()
@@ -92,13 +111,23 @@ const placeSplash = async () => {
     })
   }
 
-  const splashW = Math.min(window.innerWidth * 0.58, 420)
+  const mobile = isMobile.value
+  const anchor = mobile ? null : getDockAnchor()
+  const dock = anchor ? getDockTarget(anchor) : null
+  const maxRatio = mobile ? 0.72 : 0.55
+  const splashW = dock
+    ? Math.min(dock.width * 1.06, window.innerWidth * maxRatio, 400)
+    : Math.min(window.innerWidth * maxRatio, 380)
+
+  const centerX = dock ? dock.centerX : window.innerWidth / 2
+  const centerY = dock ? dock.centerY : window.innerHeight * 0.44
+
   logoSettling.value = false
 
   el.style.transition = 'none'
   el.style.position = 'fixed'
-  el.style.left = '50%'
-  el.style.top = '45%'
+  el.style.left = `${centerX}px`
+  el.style.top = `${centerY}px`
   el.style.width = `${splashW}px`
   el.style.height = 'auto'
   el.style.right = 'auto'
@@ -107,27 +136,16 @@ const placeSplash = async () => {
   el.style.opacity = '1'
   el.style.transform = 'translate(-50%, -50%)'
   el.style.transformOrigin = 'center center'
+
+  await nextTick()
+  publishSplashBottom(el.getBoundingClientRect().bottom)
 }
 
-/** Destino final: ancla + compensación de scrollbar */
-const getDockTarget = (anchor: HTMLElement) => {
-  const rect = anchor.getBoundingClientRect()
-  const currentSb = window.innerWidth - document.documentElement.clientWidth
-  const realSb = getScrollbarWidth()
-  const compensate = Math.max(0, realSb - currentSb)
-
-  return {
-    left: rect.left - compensate,
-    top: rect.top,
-    width: rect.width,
-  }
-}
-
-/** Mueve el logo hacia el ancla; cerca del final se desvanece */
+/** Leve encaje al tamaño del dock; el velo se abre sin ocultar el dragón */
 const playDock = async () => {
   await nextTick()
   const el = logoRef.value
-  const anchor = logoAnchorRef.value
+  const anchor = getDockAnchor()
 
   if (!el || !anchor) {
     emit('dock-near-end')
@@ -152,9 +170,9 @@ const playDock = async () => {
   void el.offsetWidth
 
   el.style.transition = [
-    `left ${DOCK_MS}ms cubic-bezier(0.65, 0, 0.35, 1)`,
-    `top ${DOCK_MS}ms cubic-bezier(0.65, 0, 0.35, 1)`,
-    `width ${DOCK_MS}ms cubic-bezier(0.65, 0, 0.35, 1)`,
+    `left ${DOCK_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+    `top ${DOCK_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+    `width ${DOCK_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
   ].join(', ')
   el.style.left = `${to.left}px`
   el.style.top = `${to.top}px`
@@ -162,45 +180,26 @@ const playDock = async () => {
 
   if (nearTimer) clearTimeout(nearTimer)
   if (doneTimer) clearTimeout(doneTimer)
-  if (appearTimer) clearTimeout(appearTimer)
 
-  // Se acerca al destino: fade-out + revelar página
   nearTimer = setTimeout(() => {
-    const logo = logoRef.value
-    if (logo) {
-      logo.style.transition = [
-        logo.style.transition,
-        `opacity ${FADE_OUT_MS}ms ease`,
-      ].filter(Boolean).join(', ')
-      logo.style.opacity = '0'
-    }
     emit('dock-near-end')
-  }, DOCK_MS * FADE_OUT_AT)
+  }, DOCK_MS * REVEAL_AT)
 
-  // Ya invisible: colocar fijo en header y reaparecer con la página
-  doneTimer = setTimeout(() => finishDock(), DOCK_MS * FADE_OUT_AT + FADE_OUT_MS + 40)
+  doneTimer = setTimeout(() => finishDock(), DOCK_MS + 40)
 }
 
 const finishDock = async () => {
   document.body.style.overflow = ''
-  await nextTick()
-
-  const el = logoRef.value
-  // Invisible en el header mientras corren el resto de animaciones
-  logoSettling.value = true
-  clearLogoInline()
-  if (el) el.style.opacity = '0'
-
   isReady.value = true
+  logoSettling.value = true
   emit('dock-done')
 
   await nextTick()
-  // Último elemento: reaparece lento cuando lo demás ya entró
-  appearTimer = setTimeout(() => {
-    logoSettling.value = false
-    const logo = logoRef.value
-    if (logo) logo.style.opacity = ''
-  }, LOGO_APPEAR_DELAY_MS)
+  await nextTick()
+  clearLogoInline()
+  logoSettling.value = false
+  const el = logoRef.value
+  if (el) el.style.opacity = '1'
 }
 
 watch(
@@ -231,7 +230,6 @@ onUnmounted(() => {
   window.removeEventListener('resize', updateLayout);
   if (nearTimer) clearTimeout(nearTimer)
   if (doneTimer) clearTimeout(doneTimer)
-  if (appearTimer) clearTimeout(appearTimer)
 });
 </script>
 
@@ -240,96 +238,65 @@ onUnmounted(() => {
     <div class="letters">
       <div class="brand-letters">
         <img :src="`${imageStore.imagePath}/letras.webp`" alt="DRS">
-        <span class="brand-shine" aria-hidden="true"></span>
+        <span class="brand-shine-clip" aria-hidden="true">
+          <span class="brand-shine"></span>
+        </span>
       </div>
     </div>
-    <div class="banner">
-      <!-- Ancla: reserva el lugar final. El dragón (único) vive aquí / Teleport a body en intro -->
-      <div ref="logoAnchorRef" class="logo-anchor">
-        <Teleport to="body" :disabled="introPhase === 'done'">
-          <div
-            ref="logoRef"
-            class="brand-logo"
-            :class="{
-              splash: introPhase === 'loading',
-              docking: introPhase === 'docking',
-              intro: introPhase !== 'done',
-              settling: logoSettling,
-              appear: introPhase === 'done' && !logoSettling,
-            }"
-          >
-            <img :src="`${imageStore.imagePath || '/images'}/drs.webp`" alt="Logo DRS">
-          </div>
-        </Teleport>
-      </div>
-      <div>
-        <ul>
-          <a href="#Home" class="link-style" aria-label="Inicio" style="--i: 0">
-            <li><i class="fa-solid fa-house"></i></li>
-          </a>
-          <li class="lang-slot" style="--i: 0">
-            <LanguagesSelector />
-          </li>
-          <a href="#Softwares" class="link-style" style="--i: 1">
-            <li>{{ t('nav.softwares') }}</li>
-          </a>
-          <a href="#Reviews" class="link-style" style="--i: 2">
-            <li>{{ t('nav.reviews') }}</li>
-          </a>
-          <a href="#Contacto" class="link-style" style="--i: 3">
-            <li>{{ t('nav.contact') }}</li>
-          </a>
-        </ul>
-      </div>
+
+    <div class="header-lang" :class="{ ready: isReady }">
+      <LanguagesSelector />
     </div>
+
+    <div ref="logoAnchorRef" class="logo-anchor" aria-hidden="true"></div>
+    <Teleport :to="logoTeleportTarget">
+      <div
+        ref="logoRef"
+        class="brand-logo"
+        :class="{
+          splash: introPhase === 'loading',
+          docking: introPhase === 'docking',
+          intro: introPhase !== 'done',
+          parked: introPhase === 'done',
+          settling: logoSettling,
+        }"
+      >
+        <img :src="`${imageStore.imagePath || '/images'}/drs.webp`" alt="Logo DRS">
+      </div>
+    </Teleport>
   </div>
 
   <div v-if="isMobile" class="mobile-wrap" :class="{ ready: isReady }">
     <div class="menu">
-      <div class="toggleMobile" :class="{ active: MenuIsActive }" @click="menuMobile">
-        <i class="fa-solid fa-bars"></i>
-      </div>
       <div class="lettersMobile">
         <div class="brand-letters">
           <img :src="`${imageStore.imagePath}/letras.webp`" alt="DRS">
-          <span class="brand-shine" aria-hidden="true"></span>
+          <span class="brand-shine-clip" aria-hidden="true">
+            <span class="brand-shine"></span>
+          </span>
         </div>
       </div>
-      <div class="logoMobile">
-        <div ref="logoAnchorRef" class="logo-anchor logo-anchor--mobile">
-          <Teleport to="body" :disabled="introPhase === 'done'">
-            <div
-              ref="logoRef"
-              class="brand-logo brand-logo--mobile"
-              :class="{
-                splash: introPhase === 'loading',
-                docking: introPhase === 'docking',
-                intro: introPhase !== 'done',
-                settling: logoSettling,
-                appear: introPhase === 'done' && !logoSettling,
-              }"
-            >
-              <img :src="`${imageStore.imagePath || '/images'}/drs.webp`" alt="Logo DRS">
-            </div>
-          </Teleport>
-        </div>
+
+      <div class="header-lang header-lang--mobile" :class="{ ready: isReady }">
+        <LanguagesSelector />
       </div>
-    </div>
-    <div class="list" :class="{ active: MenuIsActive }">
-      <ul @click="menuMobile">
-        <li class="lang-slot-mobile" @click.stop>
-          <LanguagesSelector />
-        </li>
-        <li style="--i: 0">
-          <a href="#Softwares" class="link-style">{{ t('nav.softwares') }}</a>
-        </li>
-        <li style="--i: 1">
-          <a href="#Reviews" class="link-style">{{ t('nav.reviews') }}</a>
-        </li>
-        <li style="--i: 2">
-          <a href="#Contacto" class="link-style">{{ t('nav.contact') }}</a>
-        </li>
-      </ul>
+
+      <div ref="logoAnchorRef" class="logo-anchor logo-anchor--mobile" aria-hidden="true"></div>
+      <Teleport :to="logoTeleportTarget">
+        <div
+          ref="logoRef"
+          class="brand-logo brand-logo--mobile"
+          :class="{
+            splash: introPhase === 'loading',
+            docking: introPhase === 'docking',
+            intro: introPhase !== 'done',
+            parked: introPhase === 'done',
+            settling: logoSettling,
+          }"
+        >
+          <img :src="`${imageStore.imagePath || '/images'}/drs.webp`" alt="Logo DRS">
+        </div>
+      </Teleport>
     </div>
   </div>
 </template>
@@ -376,16 +343,16 @@ onUnmounted(() => {
 
 @keyframes shineSweep {
   0% {
-    transform: translateX(-130%) skewX(-18deg);
+    transform: translateX(-120%) skewX(-18deg);
     opacity: 0;
   }
   12% { opacity: 0.75; }
   35% {
-    transform: translateX(130%) skewX(-18deg);
+    transform: translateX(220%) skewX(-18deg);
     opacity: 0;
   }
   100% {
-    transform: translateX(130%) skewX(-18deg);
+    transform: translateX(220%) skewX(-18deg);
     opacity: 0;
   }
 }
@@ -401,6 +368,34 @@ onUnmounted(() => {
   }
 }
 
+/* Latido constante del dragón en su lugar */
+@keyframes dragonHeartbeat {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0.35rem 1rem rgba(0, 0, 0, 0.55));
+  }
+  12% {
+    transform: scale(1.008);
+    filter:
+      drop-shadow(0 0.35rem 1rem rgba(0, 0, 0, 0.55))
+      drop-shadow(0 0 0.4rem rgba(170, 24, 24, 0.1));
+  }
+  24% {
+    transform: scale(1);
+    filter: drop-shadow(0 0.35rem 1rem rgba(0, 0, 0, 0.55));
+  }
+  36% {
+    transform: scale(1.012);
+    filter:
+      drop-shadow(0 0.35rem 1rem rgba(0, 0, 0, 0.55))
+      drop-shadow(0 0 0.5rem rgba(170, 24, 24, 0.12));
+  }
+  52%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0.35rem 1rem rgba(0, 0, 0, 0.55));
+  }
+}
+
 @keyframes navItemIn {
   0% {
     opacity: 0;
@@ -412,28 +407,6 @@ onUnmounted(() => {
   }
 }
 
-@keyframes mobileBarIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-1rem);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes mobileItemIn {
-  0% {
-    opacity: 0;
-    transform: translateX(-1rem);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
 /* ========== Mobile ========== */
 .mobile-wrap {
   position: relative;
@@ -441,90 +414,15 @@ onUnmounted(() => {
   overflow: visible;
 }
 
+/* Sin menú: no reserva alto, sus hijos son absolutos sobre el hero */
 .menu {
   position: relative;
   top: 0;
   width: 100%;
-  height: 7rem;
+  height: 0;
   z-index: 1000;
   background: transparent;
   overflow: visible;
-}
-
-.list.active {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  pointer-events: auto;
-}
-
-.list.active li {
-  animation: mobileItemIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: calc(0.06s * var(--i, 0) + 0.08s);
-}
-
-.list {
-  position: absolute;
-  padding: 1.2rem 1.6rem;
-  transform: translateY(-1.5rem) scale(0.97);
-  top: 7rem;
-  left: 4%;
-  right: 4%;
-  font-size: 2.6rem;
-  font-family: var(--familyTitles), Georgia, serif;
-  z-index: 100;
-  background: linear-gradient(160deg, rgba(5, 11, 20, 0.92), rgba(20, 12, 18, 0.94));
-  border: 0.05rem solid rgba(170, 24, 24, 0.35);
-  border-radius: 1rem;
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    opacity 0.35s ease,
-    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(10px);
-}
-
-.list ul {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.list .link-style {
-  display: block;
-  padding: 0.7rem 0.6rem;
-  border-radius: 0.6rem;
-  color: #f2f2f2;
-  transition: background-color 0.25s ease, color 0.25s ease, padding-left 0.25s ease;
-}
-
-.list .link-style:hover,
-.list .link-style:active {
-  background-color: rgba(170, 24, 24, 0.2);
-  color: #ff6b6b;
-  padding-left: 1.2rem;
-}
-
-.toggleMobile.active {
-  color: var(--color-first);
-  transform: rotate(90deg);
-}
-
-.toggleMobile {
-  position: absolute;
-  left: 10%;
-  font-size: 4rem;
-  top: 0.5rem;
-  z-index: 1001;
-  color: #e8e8e8;
-  transition: color 0.35s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-  cursor: pointer;
-  text-shadow: 0 0.1rem 0.4rem rgba(0, 0, 0, 0.5);
-}
-
-.mobile-wrap.ready .toggleMobile {
-  animation: mobileBarIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Posición: superior izquierda sobre el hero */
@@ -540,10 +438,6 @@ onUnmounted(() => {
   width: 100%;
   display: block;
   opacity: 0;
-}
-
-.logoMobile {
-  position: relative;
 }
 
 /* ========== Desktop ========== */
@@ -594,10 +488,21 @@ onUnmounted(() => {
   will-change: transform, filter;
 }
 
+/* Brillo solo en la zona central de las letras */
+.brand-shine-clip {
+  position: absolute;
+  left: 4%;
+  right: 7%;
+  top: 2%;
+  bottom: 2%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 .brand-shine {
   position: absolute;
-  inset: -10% auto -10% 0;
-  width: 35%;
+  inset: -15% auto -15% 0;
+  width: 45%;
   background: linear-gradient(
     100deg,
     transparent 0%,
@@ -611,21 +516,26 @@ onUnmounted(() => {
   mix-blend-mode: screen;
 }
 
-.link-style {
-  color: var(--color-first);
-  text-decoration: none;
+/* Selector de idioma: esquina superior derecha */
+.header-lang {
+  position: absolute;
+  top: 1.4rem;
+  right: 2.4rem;
+  z-index: 300;
+  opacity: 0;
+  transform: translateY(-0.4rem);
+  pointer-events: none;
 }
 
-.banner {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 50%;
-  height: 4.5rem;
-  border-radius: 0.1rem 5rem;
-  background: transparent;
-  box-shadow: none;
-  z-index: 100;
+.header-lang.ready {
+  pointer-events: auto;
+  animation: navItemIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 0.55s;
+}
+
+.header-lang--mobile {
+  top: 1.6rem;
+  right: 1.6rem;
 }
 
 /* Ancla: reserva el espacio del logo en el header */
@@ -646,7 +556,7 @@ onUnmounted(() => {
   height: 7rem;
 }
 
-/* Logo del dragón: un solo elemento (splash → dock → header) */
+/* Logo del dragón: un solo elemento (splash → dock → #dragon-dock) */
 .brand-logo {
   position: absolute;
   right: 2rem;
@@ -662,38 +572,39 @@ onUnmounted(() => {
   transition: none !important;
 }
 
-.brand-logo.appear {
-  animation: logoSettleIn 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+/* Parqueado en el hueco de las cards: sin clip ni posición de header */
+.brand-logo.parked {
+  position: relative;
+  right: auto;
+  top: auto;
+  left: auto;
+  width: 100%;
+  margin: 0;
+  transform: none;
+  z-index: 2;
 }
 
-@keyframes logoSettleIn {
-  0% {
-    opacity: 0;
-    filter:
-      drop-shadow(0 0 0 rgba(0, 0, 0, 0))
-      brightness(1.4);
-    transform: scale(0.9);
-  }
-  55% {
-    opacity: 1;
-    filter:
-      drop-shadow(0 0.35rem 0.9rem rgba(0, 0, 0, 0.45))
-      brightness(1.08);
-    transform: scale(1.03);
-  }
-  100% {
-    opacity: 1;
-    filter:
-      drop-shadow(0 0.25rem 0.55rem rgba(0, 0, 0, 0.4))
-      brightness(1);
-    transform: scale(1);
-  }
+.brand-logo.parked img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0;
+  clip-path: none;
+  transform-origin: center center;
+  animation: dragonHeartbeat 2.8s ease-in-out infinite;
+  will-change: transform;
 }
 
 .brand-logo--mobile {
   top: 2rem;
   width: 15rem;
   right: 2rem;
+}
+
+.brand-logo.parked.brand-logo--mobile {
+  width: 100%;
+  top: auto;
+  right: auto;
 }
 
 .brand-logo img {
@@ -749,84 +660,14 @@ onUnmounted(() => {
   animation: shineSweep 4.2s 1.8s ease-in-out infinite;
 }
 
-.banner ul {
-  list-style: none;
-  color: var(--color-first);
-  justify-content: center;
-  display: flex;
-  font-size: 1.5rem;
-  font-family: var(--familyTitles), Georgia, serif;
-  letter-spacing: 0.02em;
-  margin-top: 1rem;
-  margin-right: 15rem;
-}
-
-.banner a.link-style {
-  opacity: 0;
-}
-
-.menuTop.ready .banner a.link-style,
-.menuTop.ready .banner .lang-slot {
-  animation: navItemIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: calc(0.08s * var(--i, 0) + 0.55s);
-}
-
-.banner .lang-slot {
-  list-style: none;
-  display: flex;
-  align-items: center;
-  margin-right: 1.2rem;
-  opacity: 0;
-}
-
-.lang-slot-mobile {
-  padding: 0.4rem 0.6rem 1rem;
-}
-
-.banner li {
-  transition:
-    text-shadow 0.3s ease,
-    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-    color 0.25s ease;
-  margin-right: 3rem;
-}
-
-.banner a:hover li {
-  text-shadow:
-    0 0 0.6rem rgba(170, 24, 24, 0.55),
-    0 0.1rem 0.35rem rgba(170, 24, 24, 0.4);
-  transform: translateY(-0.15rem) scale(1.04);
-  cursor: pointer;
-  color: #d42222;
-}
-
-.banner a {
-  position: relative;
-}
-
-.banner a::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: -0.3rem;
-  width: 0;
-  height: 0.14rem;
-  background: linear-gradient(90deg, transparent, var(--color-first), transparent);
-  border-radius: 1rem;
-  transform: translateX(-50%);
-  transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.banner a:hover::after {
-  width: 70%;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .menuTop.ready .letters .brand-letters,
   .menuTop.ready .letters .brand-shine,
   .mobile-wrap.ready .lettersMobile .brand-letters,
   .mobile-wrap.ready .lettersMobile .brand-shine,
-  .brand-logo.splash img {
+  .header-lang.ready,
+  .brand-logo.splash img,
+  .brand-logo.parked img {
     animation: none !important;
     opacity: 1;
     transform: none;

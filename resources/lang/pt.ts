@@ -5,6 +5,9 @@ export default {
     reviews: 'Reviews',
     contact: 'Contato',
   },
+  hero: {
+    tagline: 'Você está preparado?...',
+  },
   about: {
     button: 'Sobre o desenvolvedor',
     title: 'Desenvolvedor',
