@@ -86,7 +86,7 @@ const selectRating = (index: number) => {
 </script>
 
 <template>
-    <LanguagesSelector></LanguagesSelector>
+    <LanguagesSelector floating />
     <div class="reviews-content">
         <div id="letters">
             <img :src="`${imageStore.imagePath}/letras.webp`" alt="">

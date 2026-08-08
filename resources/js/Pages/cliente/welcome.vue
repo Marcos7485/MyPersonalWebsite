@@ -69,7 +69,7 @@ const submitForm = async () => {
 </script>
 
 <template>
-    <LanguagesSelector></LanguagesSelector>
+    <LanguagesSelector floating />
 
     <transition name="fade">
         <div v-if="showVideo" class="video-overlay">

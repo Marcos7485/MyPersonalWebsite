@@ -1,255 +1,776 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useLanguageStore } from '../store/language.ts';
 import { useImageStore } from '../store/imageStore.ts';
 
 const imageStore = useImageStore();
-onMounted(() => {
-    imageStore.fetchImagePath();
-});
-
 const languageStore = useLanguageStore();
 
+const apps = [
+    { id: 1, type: 'app' },
+    { id: 2, type: 'app' },
+    { id: 3, type: 'empty' },
+    { id: 4, type: 'empty' },
+    { id: 5, type: 'empty' },
+];
+
+/** Ángulos del abanico (arco uniforme en las bases) */
+const FAN_ANGLES = [-34, -17, 0, 17, 34];
+
+const emit = defineEmits<{
+    'enter-app': [appId: number];
+}>();
+
+const aboutOpen = ref(false);
+const hoveredIndex = ref<number | null>(null);
+const selectedIndex = ref<number | null>(null);
+const viewport = ref<'desktop' | 'tablet' | 'mobile'>('desktop');
+
+const updateViewport = () => {
+    const w = window.innerWidth;
+    if (w <= 600) viewport.value = 'mobile';
+    else if (w <= 900) viewport.value = 'tablet';
+    else viewport.value = 'desktop';
+};
+
+/** Radio del arco según viewport para que no se salga del stage */
+const arcRadius = computed(() => {
+    if (viewport.value === 'mobile') return 34;
+    if (viewport.value === 'tablet') return 44;
+    return 56;
+});
+
+const fanLayout = computed(() =>
+    FAN_ANGLES.map((angle, index) => {
+        const rad = (angle * Math.PI) / 180;
+        const r = arcRadius.value;
+        return {
+            angle,
+            x: Number((r * Math.sin(rad)).toFixed(2)),
+            y: Number((r * (1 - Math.cos(rad))).toFixed(2)),
+            z: 3 - Math.abs(index - 2),
+        };
+    }),
+);
+
+const cardStyle = (index: number) => {
+    const isSelected = selectedIndex.value === index;
+    const isHovered = hoveredIndex.value === index && selectedIndex.value === null;
+
+    if (isSelected) {
+        return {
+            top: '42%',
+            transform: 'translate(-50%, -50%) rotate(0deg)',
+            transformOrigin: 'center center',
+            zIndex: 40,
+        };
+    }
+
+    const layout = fanLayout.value[index];
+    return {
+        top: '58%',
+        transform: `
+            translate(-50%, -100%)
+            translate(${layout.x}rem, ${layout.y}rem)
+            rotate(${layout.angle}deg)
+        `,
+        transformOrigin: '50% 100%',
+        zIndex: isHovered ? 20 : layout.z,
+    };
+};
+
+const onCardEnter = (index: number) => {
+    if (selectedIndex.value !== null) return;
+    hoveredIndex.value = index;
+};
+
+const onCardLeave = (index: number) => {
+    if (hoveredIndex.value === index) {
+        hoveredIndex.value = null;
+    }
+};
+
+const selectCard = (index: number) => {
+    if (selectedIndex.value === index) return;
+    selectedIndex.value = index;
+    hoveredIndex.value = null;
+};
+
+const deselectCard = () => {
+    selectedIndex.value = null;
+};
+
+const openAppDetail = (index: number) => {
+    if (selectedIndex.value !== index) return;
+    emit('enter-app', apps[index].id);
+};
+
+const toggleAbout = () => {
+    aboutOpen.value = !aboutOpen.value;
+};
+
+const uiLabels = computed(() => ({
+    moreInfo: languageStore.t('cards.moreInfo'),
+    back: languageStore.t('cards.back'),
+    aboutButton: languageStore.t('about.button'),
+    aboutTitle: languageStore.t('about.title'),
+    aboutBody: languageStore.t('about.body'),
+}));
+
+onMounted(() => {
+    imageStore.fetchImagePath();
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('resize', updateViewport);
+});
 </script>
 
 <template>
-    <section id="Home">
-        <div class="content">
-            <div class="fondo">
-                <div>
-                    <img :src="`${imageStore.imagePath}/seccion-1/picture.webp`" alt="Marcos">
-                </div>
-                <div>
-                    <h1 v-if="languageStore.languages === 'esp' || languageStore.languages.length === 0">Desarrollador
-                    </h1>
-                    <h1 v-if="languageStore.languages === 'pt'">Desenvolvedor</h1>
-                    <h1 v-if="languageStore.languages === 'eng'">Developer</h1>
-                    <p id="esp" v-if="languageStore.languages === 'esp' || languageStore.languages.length === 0">¡Hola!
-                        Soy Marcos Gonzalez,
-                        soy desarrollador web fullstack dedicado a realizar las soluciones mas eficientes a los
-                        problemas de todas las personas
-                        con un software que entiendan todas las personas.
-                        Menos es mas, solucionar es mejor que lucir, facilidad, no complejidad, si deberia decir la
-                        descripcion en una sola palabra
-                        es - eficiencia -.
-                    </p>
+    <section id="Home" class="hero">
+        <div class="atmosphere" aria-hidden="true">
+            <div class="glow glow-a"></div>
+            <div class="glow glow-b"></div>
+            <div class="vignette"></div>
+        </div>
 
-                    <p v-if="languageStore.languages === 'pt'">
-                        Olá!
-                        Sou Marcos Gonzalez,
-                        sou desenvolvedor web fullstack dedicado a criar as soluções mais eficientes para os problemas
-                        de todas as pessoas,
-                        com um software que qualquer pessoa possa entender.
-                        Menos é mais, facilidade, não complexidade.
-                        Se eu tivesse que descrever em uma única palavra, seria - eficiência -.
-                    </p>
+        <div class="hero-inner">
+            <div class="stage" :class="{ 'has-selection': selectedIndex !== null }">
+                <div class="fan">
+                    <article
+                        v-for="(app, index) in apps"
+                        :key="app.id"
+                        class="card"
+                        :class="{
+                            hovered: hoveredIndex === index && selectedIndex === null,
+                            selected: selectedIndex === index,
+                            dimmed: selectedIndex !== null && selectedIndex !== index,
+                        }"
+                        :style="cardStyle(index)"
+                        @pointerenter="onCardEnter(index)"
+                        @pointerleave="onCardLeave(index)"
+                        @click="selectCard(index)"
+                    >
+                        <div class="card-face">
+                            <button
+                                v-if="selectedIndex === index"
+                                type="button"
+                                class="card-back"
+                                @click.stop="deselectCard"
+                            >
+                                <i class="fa-solid fa-arrow-left"></i>
+                                <span>{{ uiLabels.back }}</span>
+                            </button>
 
-                    <p v-if="languageStore.languages === 'eng'">
-                        Hello!
-                        I'm Marcos Gonzalez,
-                        a full-stack web developer dedicated to creating the most efficient solutions to people's
-                        problems,
-                        with software that anyone can understand.
-                        Less is more, solving is better than showing off, simplicity over complexity.
-                        If I had to describe it in a single word, it would be - efficiency -.
-                    </p>
+                            <div class="card-empty">
+                                <span class="card-ghost"></span>
+                                <span class="card-ghost short"></span>
+                                <span class="card-ghost shorter"></span>
+                            </div>
+
+                            <button
+                                v-if="selectedIndex === index"
+                                type="button"
+                                class="card-banner"
+                                @click.stop="openAppDetail(index)"
+                            >
+                                {{ uiLabels.moreInfo }}
+                            </button>
+                        </div>
+                    </article>
+                    <div class="arc-brand" aria-hidden="false">
+                        <img
+                            :src="`${imageStore.imagePath}/iqathletic/icon.png`"
+                            alt="IQ Athletic"
+                            class="arc-brand-logo"
+                        >
+                    </div>
+                    <div class="hand-shadow" aria-hidden="true"></div>
                 </div>
             </div>
-            <div id="fig-content1">
-                <img :src="`${imageStore.imagePath}/seccion-1/figura1.svg`">
-            </div>
-            <div id="fig-content2">
-                <img :src="`${imageStore.imagePath}/seccion-1/figura2.svg`">
-            </div>
-            <div id="fig-content3">
-                <img :src="`${imageStore.imagePath}/seccion-1/figura3.svg`">
+
+            <div class="about">
+                <button
+                    type="button"
+                    class="about-trigger"
+                    :class="{ open: aboutOpen }"
+                    :aria-expanded="aboutOpen"
+                    @click="toggleAbout"
+                >
+                    <span class="about-icon">
+                        <i class="fa-solid fa-user"></i>
+                    </span>
+                    <span>{{ uiLabels.aboutButton }}</span>
+                    <i class="fa-solid fa-chevron-down chevron"></i>
+                </button>
+
+                <div class="about-panel" :class="{ open: aboutOpen }">
+                    <div class="about-panel-inner">
+                        <div class="about-photo">
+                            <img
+                                :src="`${imageStore.imagePath}/seccion-1/picture.webp`"
+                                alt="Marcos Gonzalez"
+                            >
+                        </div>
+                        <div class="about-text">
+                            <h2>{{ uiLabels.aboutTitle }}</h2>
+                            <p>{{ uiLabels.aboutBody }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 </template>
 
 <style scoped>
-.content {
+.hero {
+    --hero-red: var(--color-first);
+
     position: relative;
-    /* Necesario para posicionar los elementos hijos absolutamente */
     width: 100%;
-    height: 69rem;
+    min-height: 64rem;
     margin-top: -5rem;
-    padding: 10rem;
-    animation: appear 2s forwards;
-    overflow-y: hidden;
-    overflow-X: hidden;
-}
-
-.fondo {
-    position: relative;
-    top: 5rem;
-    left: 5rem;
-    background-color: black;
-    border-radius: 1rem 4rem;
-    box-shadow: 0 0 .5rem white;
-    opacity: 90%;
-    align-items: center;
-    text-align: left;
-    display: flex;
-    padding: 5rem;
-    width: 90%;
-    z-index: 20;
-}
-
-
-#fig-content3 img {
-    position: absolute;
-    bottom: 0;
-    left: 80%;
-    width: 10rem;
-    z-index: 99;
-    opacity: 0;
-    animation: translateImgUp 1s 1s ease forwards;
-}
-
-#fig-content2 img {
-    position: absolute;
-    width: 8rem;
-    bottom: 0;
-    left: 78%;
-    z-index: 100;
-    opacity: 0;
-    animation: translateImgUp 1s .5s ease forwards;
-}
-
-#fig-content1 img {
-    position: absolute;
-    top: 0;
-    left: 5rem;
-    width: 22rem;
-    z-index: 100;
-    opacity: 0;
-    animation: translateImgDown 1s .5s ease forwards;
-}
-
-.fondo h1 {
-    font-size: var(--fontsizeTitles);
-    color: var(--color-first);
-}
-
-.fondo h2 {
-    color: var(--color-first);
-}
-
-.fondo div img {
-    max-width: 25rem;
-    border-radius: 3rem;
-    margin-right: 3rem;
-}
-
-.fondo div p {
-    font-size: var(--fontsize);
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse 70% 50% at 50% 45%, rgba(14, 40, 78, 0.5), transparent 65%),
+        linear-gradient(180deg, #050b14 0%, #02060c 55%, #010308 100%);
     color: white;
+    animation: appear 1.2s ease forwards;
 }
 
-@keyframes translateImgUp {
-    from {
-        transform: translateY(10rem);
-    }
-
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+.atmosphere {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
 }
 
-@keyframes translateImgDown {
-    from {
-        transform: translateY(-10rem);
-    }
+.glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px);
+}
 
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+.glow-a {
+    width: 48rem;
+    height: 48rem;
+    top: 18%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, rgba(28, 80, 150, 0.4), transparent 70%);
+    animation: pulseGlow 7s ease-in-out infinite;
+}
+
+.glow-b {
+    width: 28rem;
+    height: 28rem;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, rgba(170, 24, 24, 0.12), transparent 70%);
+}
+
+.vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 42%, rgba(0, 0, 0, 0.75) 100%);
+    box-shadow: inset 0 0 10rem rgba(0, 8, 20, 0.85);
+}
+
+.hero-inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 2rem;
+    padding: 9rem 2rem 3rem;
+    min-height: 64rem;
+}
+
+.stage {
+    position: relative;
+    width: min(100%, 118rem);
+    height: 46rem;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.fan {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.hand-shadow {
+    position: absolute;
+    left: 50%;
+    top: 62%;
+    width: 78rem;
+    height: 6rem;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(0, 0, 0, 0.68), transparent 72%);
+    filter: blur(14px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.arc-brand {
+    position: absolute;
+    left: 50%;
+    top: 78%;
+    transform: translate(-50%, -50%);
+    z-index: 6;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.arc-brand-logo {
+    width: 9rem;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 0.35rem 0.8rem rgba(0, 0, 0, 0.55));
+    opacity: 0.92;
+}
+
+.card {
+    position: absolute;
+    left: 50%;
+    top: 58%;
+    bottom: auto;
+    width: 18rem;
+    height: 26rem;
+    box-sizing: border-box;
+    cursor: pointer;
+    border-radius: 1.6rem;
+    transition:
+        transform 0.55s cubic-bezier(0.22, 0.85, 0.28, 1),
+        top 0.55s cubic-bezier(0.22, 0.85, 0.28, 1),
+        filter 0.35s ease,
+        opacity 0.35s ease;
+}
+
+.card.dimmed {
+    filter: brightness(0.45);
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+.card.selected {
+    cursor: default;
+    width: 22rem;
+    height: 31rem;
+}
+
+/* El resaltado va en la cara: el hitbox del .card NO se mueve */
+.card-face {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    border-radius: 1.6rem;
+    background: linear-gradient(165deg, #424956 0%, #262b34 55%, #1a1e26 100%);
+    border: 1px solid rgba(180, 190, 205, 0.16);
+    padding: 1.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 1rem;
+    overflow: hidden;
+    filter: brightness(0.82);
+    box-shadow:
+        0 1.4rem 2.6rem rgba(0, 0, 0, 0.55),
+        0 0.5rem 1.2rem rgba(0, 0, 0, 0.35);
+    transition:
+        filter 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease,
+        background 0.25s ease;
+    pointer-events: none;
+}
+
+.card.selected .card-face {
+    pointer-events: auto;
+    filter: brightness(1.12);
+    border-color: rgba(140, 185, 255, 0.55);
+    background: linear-gradient(165deg, #545d6c 0%, #323944 55%, #222831 100%);
+    box-shadow:
+        0 2.8rem 5rem rgba(0, 0, 0, 0.8),
+        0 0 3.5rem rgba(40, 110, 200, 0.45),
+        0 0 1.5rem rgba(170, 24, 24, 0.2);
+    padding: 1.2rem;
+    gap: 0.8rem;
+}
+
+.card-face::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.12), transparent 40%),
+        linear-gradient(to left, rgba(0, 0, 0, 0.22), transparent 28%),
+        linear-gradient(to right, rgba(0, 0, 0, 0.22), transparent 28%);
+    pointer-events: none;
+}
+
+.card-face::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 2.5rem rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+}
+
+.card.hovered .card-face {
+    filter: brightness(1.1);
+    border-color: rgba(140, 185, 255, 0.5);
+    background: linear-gradient(165deg, #505868 0%, #2f3642 55%, #20252e 100%);
+    box-shadow:
+        0 2.4rem 4.2rem rgba(0, 0, 0, 0.72),
+        0 0 2.8rem rgba(40, 110, 200, 0.35),
+        0 0 1.2rem rgba(170, 24, 24, 0.15);
+}
+
+.card-back {
+    position: relative;
+    z-index: 2;
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(180, 200, 230, 0.35);
+    background: rgba(0, 0, 0, 0.4);
+    color: #e8eef8;
+    font-size: 1.25rem;
+    line-height: 1.2;
+    font-family: var(--familyTitles);
+    padding: 0.7rem 0.9rem;
+    border-radius: 0.6rem;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.card-back:hover {
+    background: rgba(170, 24, 24, 0.35);
+    border-color: rgba(170, 24, 24, 0.6);
+}
+
+.card-back i {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.card-back span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-empty {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    flex: 1 1 auto;
+    justify-content: center;
+}
+
+.card-banner {
+    position: relative;
+    z-index: 2;
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0.9rem 0.8rem;
+    text-align: center;
+    font-family: var(--familyTitles);
+    font-size: 1.3rem;
+    line-height: 1.2;
+    letter-spacing: 0.03em;
+    color: #111;
+    background: linear-gradient(180deg, #f5d76e 0%, #e4c04a 45%, #d4a017 100%);
+    border-radius: 0.6rem;
+    border: 1px solid rgba(80, 60, 0, 0.25);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.card-banner:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+}
+
+.card-ghost {
+    display: block;
+    height: 1.2rem;
+    width: 78%;
+    border-radius: 0.4rem;
+    background: linear-gradient(90deg, #505868, #3a414d 50%, #505868);
+    background-size: 200% 100%;
+    animation: shimmer 2.4s linear infinite;
+    opacity: 0.5;
+}
+
+.card-ghost.short {
+    width: 56%;
+}
+
+.card-ghost.shorter {
+    width: 40%;
+}
+
+.about {
+    position: relative;
+    z-index: 5;
+    width: min(70rem, 92%);
+    flex-shrink: 0;
+    margin-top: 0.5rem;
+}
+
+.about-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.2rem;
+    padding: 1.3rem 2rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(100, 140, 200, 0.22);
+    background: linear-gradient(180deg, rgba(14, 28, 50, 0.8), rgba(6, 12, 22, 0.92));
+    color: #e8eef8;
+    font-size: 1.6rem;
+    font-family: var(--familyTitles);
+    cursor: pointer;
+    box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.4);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.about-trigger:hover,
+.about-trigger.open {
+    border-color: rgba(170, 24, 24, 0.5);
+    box-shadow:
+        0 1.2rem 3rem rgba(0, 0, 0, 0.5),
+        0 0 2rem rgba(170, 24, 24, 0.18);
+}
+
+.about-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgba(170, 24, 24, 0.2);
+    color: #ff6b6b;
+    font-size: 1.3rem;
+}
+
+.chevron {
+    transition: transform 0.35s ease;
+    font-size: 1.2rem;
+    opacity: 0.7;
+}
+
+.about-trigger.open .chevron {
+    transform: rotate(180deg);
+}
+
+.about-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.55s cubic-bezier(0.22, 0.9, 0.25, 1);
+}
+
+.about-panel.open {
+    grid-template-rows: 1fr;
+}
+
+.about-panel-inner {
+    overflow: hidden;
+    min-height: 0;
+    display: flex;
+    gap: 3rem;
+    align-items: center;
+    padding: 0 2rem;
+    opacity: 0;
+    transform: translateY(-1rem);
+    transition:
+        opacity 0.4s ease 0.05s,
+        transform 0.45s ease,
+        padding 0.45s ease;
+    background: linear-gradient(180deg, rgba(10, 18, 32, 0.95), rgba(4, 8, 14, 0.98));
+    border: 1px solid rgba(100, 140, 200, 0.12);
+    border-top: none;
+    border-radius: 0 0 1.2rem 1.2rem;
+    box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.55);
+}
+
+.about-panel.open .about-panel-inner {
+    opacity: 1;
+    transform: translateY(0);
+    padding: 2.5rem 2rem;
+}
+
+.about-photo img {
+    width: 16rem;
+    max-width: 100%;
+    border-radius: 1.4rem;
+    box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.65);
+}
+
+.about-text {
+    flex: 1;
+    text-align: left;
+}
+
+.about-text h2 {
+    font-family: var(--familyTitles);
+    font-size: 3rem;
+    color: var(--hero-red);
+    margin-bottom: 1rem;
+}
+
+.about-text p {
+    font-size: var(--fontsize);
+    color: rgba(220, 230, 245, 0.88);
+    line-height: 1.55;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+@keyframes pulseGlow {
+    0%, 100% { opacity: 0.4; transform: translateX(-50%) scale(1); }
+    50% { opacity: 0.65; transform: translateX(-50%) scale(1.06); }
 }
 
 @keyframes appear {
-    from {
-        opacity: 0;
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (max-width: 900px) {
+    .hero,
+    .hero-inner {
+        min-height: 70rem;
     }
 
-    to {
-        opacity: 1;
+    .hero-inner {
+        padding: 11rem 1.5rem 3rem;
+    }
+
+    .stage {
+        height: 42rem;
+    }
+
+    .card {
+        width: 15rem;
+        height: 22rem;
+    }
+
+    .card.selected {
+        width: 18rem;
+        height: 26rem;
+    }
+
+    .hand-shadow {
+        width: 60rem;
+        top: 60%;
+    }
+
+    .arc-brand {
+        top: 76%;
+    }
+
+    .arc-brand-logo {
+        width: 7.5rem;
+    }
+
+    .card-back,
+    .card-banner {
+        font-size: 1.15rem;
+        padding: 0.65rem 0.75rem;
+    }
+
+    .about-panel-inner {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .about-text {
+        text-align: center;
+    }
+
+    .about-text h2 {
+        font-size: var(--fontsizeTitlesMobile);
     }
 }
 
-
 @media (max-width: 600px) {
-
-
-    .content {
-        position: relative;
-        width: 100%;
-        height: 110rem;
-        padding: 0;
-        margin-top: -5rem;
-        animation: appear 2s forwards;
-        overflow-y: hidden;
-        overflow-X: hidden;
+    .hero {
+        margin-top: -3rem;
+        min-height: 78rem;
     }
 
-    .fondo {
-        display: flex;
-        flex-direction: column;
-        position: relative;
-        top: 15rem;
-        left: 3rem;
-        background-color: black;
-        border-radius: 1rem 4rem;
-        box-shadow: 0 0 .5rem white;
-        opacity: 90%;
-        align-items: center;
-        text-align: center;
-        display: flex;
-        padding: 5rem;
-        width: 90%;
-        z-index: 20;
+    .hero-inner {
+        min-height: 78rem;
+        padding-top: 12rem;
     }
 
-    .fondo div img {
-        max-width: 25rem;
-        border-radius: 3rem;
-        margin-right: 0;
+    .stage {
+        height: 40rem;
     }
 
-
-    #fig-content3 img {
-        position: absolute;
-        bottom: 0;
-        left: 80%;
-        width: 10rem;
-        z-index: 9;
-        opacity: 0;
-        animation: translateImgUp 1s 1s ease forwards;
+    .card {
+        width: 13rem;
+        height: 19rem;
     }
 
-    #fig-content2 img {
-        position: absolute;
-        width: 8rem;
-        bottom: 0;
-        left: 78%;
-        z-index: 100;
-        opacity: 0;
-        animation: translateImgUp 1s .5s ease forwards;
+    .card.selected {
+        width: 15.5rem;
+        height: 22.5rem;
     }
 
-    #fig-content1 img {
-        position: absolute;
-        top: 5rem;
-        left: 1rem;
-        width: 22rem;
-        z-index: 100;
-        opacity: 0;
-        animation: translateImgDown 1s .5s ease forwards;
+    .hand-shadow {
+        width: 48rem;
+        top: 58%;
     }
 
+    .arc-brand {
+        top: 74%;
+    }
 
+    .arc-brand-logo {
+        width: 6.5rem;
+    }
+
+    .card-back,
+    .card-banner {
+        font-size: 1.05rem;
+        padding: 0.55rem 0.65rem;
+    }
 }
 </style>

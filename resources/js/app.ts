@@ -4,6 +4,10 @@ import { createInertiaApp, Link } from '@inertiajs/vue3';
 import { createPinia } from 'pinia';
 import vIntersect from '../directives/v-intersect';
 
+if (typeof window !== 'undefined' && 'scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+}
+
 createInertiaApp({
     resolve: (name: string): DefineComponent => {
         const pages = import.meta.glob('./Pages/**/*.vue', { eager: true });

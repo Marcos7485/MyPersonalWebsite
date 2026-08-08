@@ -43,7 +43,7 @@ const submitForm = async () => {
     if (isDisabled.value) return; // Evita enviar el formulario de nuevo si ya está deshabilitado
 
     isDisabled.value = true; // Deshabilita el botón al hacer clic
-    formData.value.language = languageStore.languages;
+    formData.value.language = languageStore.locale;
 
     try {
         const response = await axios.post('/contact', formData.value);
@@ -65,21 +65,8 @@ const submitForm = async () => {
             <div id="fondo-contacto" :class="{ active: ContactObs }"></div>
             <div class="texto-contacto">
                 <div>
-                    <h1 :class="{ active: ContactObs }"
-                        v-if="languageStore.languages === 'esp' || languageStore.languages.length === 0">Contacto</h1>
-                    <h1 :class="{ active: ContactObs }" v-if="languageStore.languages === 'pt'"
-                        style="margin-left: 1.5rem;">Contato</h1>
-                    <h1 :class="{ active: ContactObs }" v-if="languageStore.languages === 'eng'"
-                        style="margin-left: 1.8rem;">Contact</h1>
-                    <h5 :class="{ active: ContactObs }"
-                        v-if="languageStore.languages === 'esp' || languageStore.languages.length === 0">Sea parte de
-                        nuestros clientes. Complete sus datos,
-                        y nos comunicaremos a la brevedad.
-                    </h5>
-                    <h5 :class="{ active: ContactObs }" v-if="languageStore.languages === 'pt'">Seja parte dos nossos
-                        clientes. Preencha seus dados e entraremos em contato o mais breve possível.</h5>
-                    <h5 :class="{ active: ContactObs }" v-if="languageStore.languages === 'eng'">Become one of our
-                        clients. Fill in your details, and we will get in touch as soon as possible.</h5>
+                    <h1 :class="{ active: ContactObs }">{{ languageStore.t('contact.title') }}</h1>
+                    <h5 :class="{ active: ContactObs }">{{ languageStore.t('contact.subtitle') }}</h5>
                 </div>
                 <div class="path2" :class="{ active: ContactObs }"></div>
                 <div>
@@ -94,23 +81,20 @@ const submitForm = async () => {
                     </div>
                     <div>
                         <input v-model="formData.name" type="text"
-                            :placeholder="languageStore.languages === 'pt' ? 'Nome' : (languageStore.languages === 'eng' ? 'Name' : 'Nombre')"
+                            :placeholder="languageStore.t('contact.name')"
                             required>
                     </div>
                     <div>
                         <input v-model="formData.phone" type="number"
-                            :placeholder="languageStore.languages === 'pt' ? 'Telefone' : (languageStore.languages === 'eng' ? 'Phone' : 'Telefono')"
+                            :placeholder="languageStore.t('contact.phone')"
                             required>
                     </div>
                     <div>
-                        <input v-model="formData.email" type="email" placeholder="E-mail" required>
+                        <input v-model="formData.email" type="email" :placeholder="languageStore.t('contact.email')" required>
                     </div>
                     <div>
                         <button class="btn" type="submit" :disabled="isDisabled">
-                            <span
-                                v-if="languageStore.languages === 'esp' || languageStore.languages.length === 0">Contactarme</span>
-                            <span v-if="languageStore.languages === 'pt'" style="padding: 2rem;">Contato</span>
-                            <span v-if="languageStore.languages === 'eng'" style="padding: 2rem;">Contact</span>
+                            <span>{{ languageStore.t('contact.submit') }}</span>
                         </button>
                     </div>
                 </form>
@@ -118,10 +102,7 @@ const submitForm = async () => {
             <div v-if="responseMessage" class="responseFormSuccess">
                 <i class="fa-solid fa-circle-check"></i>
                 <div v-if="responseMessage">
-                    <p v-if="languageStore.languages === 'esp' || languageStore.languages.length === 0">Enviado con
-                        éxito!</p>
-                    <p v-if="languageStore.languages === 'pt'">Pronto!</p>
-                    <p v-if="languageStore.languages === 'eng'">Success!</p>
+                    <p>{{ languageStore.t('contact.success') }}</p>
                 </div>
             </div>
             <div class="socialmedia">

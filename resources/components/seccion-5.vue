@@ -39,16 +39,8 @@ const cantidadDeReviews = Array.isArray(props.reviews) ? props.reviews.length : 
 <template>
     <section id="Reviews" v-intersect="ReviewsAnimate">
         <div class="content-5">
-            <h1 :class="{ active: ReviewsObs }">Reviews ({{ cantidadDeReviews }})</h1>
-            <h2 :class="{ active: ReviewsObs }"
-                v-if="languageStore.languages === 'esp' || languageStore.languages.length === 0">Únete a las personas
-                satisfechas luego de concretar tu proyecto con
-                nosotros!, tu opinión si nos importa!</h2>
-            <h2 :class="{ active: ReviewsObs }" v-if="languageStore.languages === 'pt'">Junte-se às pessoas satisfeitas
-                após concretizar seu projeto conosco! A sua opinião é importante para nós!</h2>
-            <h2 :class="{ active: ReviewsObs }" v-if="languageStore.languages === 'eng'">
-                Join the satisfied people after
-                completing your project with us! Your opinion matters to us!</h2>
+            <h1 :class="{ active: ReviewsObs }">{{ languageStore.t('reviews.title') }} ({{ cantidadDeReviews }})</h1>
+            <h2 :class="{ active: ReviewsObs }">{{ languageStore.t('reviews.subtitle') }}</h2>
             <div class="path3" :class="{ active: ReviewsObs }"></div>
             <div id="form-arrowRight" :class="{ active: ReviewsObs }"></div>
             <div id="form-arrowLeft" :class="{ active: ReviewsObs }"></div>
