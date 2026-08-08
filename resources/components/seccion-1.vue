@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useLanguageStore } from '../store/language.ts';
 import { useImageStore } from '../store/imageStore.ts';
 
@@ -14,7 +14,7 @@ export interface AppCard {
     projectIconUrl: string
 }
 
-type FanSlot =
+type CardSlot =
     | { slot: number; type: 'empty'; id: string }
     | (AppCard & { slot: number; type: 'app' })
 
@@ -25,9 +25,9 @@ const props = defineProps<{
 const imageStore = useImageStore();
 const languageStore = useLanguageStore();
 
-/** 5 posiciones; `card` de la DB = slot 1..5 */
-const apps = computed<FanSlot[]>(() =>
-    [1, 2, 3, 4, 5].map((slot) => {
+/** 3 posiciones; `card` de la DB = slot 1..3 */
+const apps = computed<CardSlot[]>(() =>
+    [1, 2, 3].map((slot) => {
         const row = props.cards.find((c) => Number(c.card) === slot)
         if (!row) {
             return { slot, type: 'empty' as const, id: `empty-${slot}` }
@@ -45,9 +45,6 @@ const arcBrand = computed(() => {
     }
 })
 
-/** Ángulos del abanico (arco uniforme en las bases) */
-const FAN_ANGLES = [-34, -17, 0, 17, 34];
-
 const emit = defineEmits<{
     'enter-app': [card: AppCard];
 }>();
@@ -55,61 +52,11 @@ const emit = defineEmits<{
 const aboutOpen = ref(false);
 const hoveredIndex = ref<number | null>(null);
 const selectedIndex = ref<number | null>(null);
-const viewport = ref<'desktop' | 'tablet' | 'mobile'>('desktop');
 
-const updateViewport = () => {
-    const w = window.innerWidth;
-    if (w <= 600) viewport.value = 'mobile';
-    else if (w <= 900) viewport.value = 'tablet';
-    else viewport.value = 'desktop';
-};
-
-/** Radio del arco según viewport para que no se salga del stage */
-const arcRadius = computed(() => {
-    if (viewport.value === 'mobile') return 34;
-    if (viewport.value === 'tablet') return 44;
-    return 56;
+const selectedApp = computed(() => {
+    if (selectedIndex.value === null) return null
+    return apps.value[selectedIndex.value]
 });
-
-const fanLayout = computed(() =>
-    FAN_ANGLES.map((angle, index) => {
-        const rad = (angle * Math.PI) / 180;
-        const r = arcRadius.value;
-        return {
-            angle,
-            x: Number((r * Math.sin(rad)).toFixed(2)),
-            y: Number((r * (1 - Math.cos(rad))).toFixed(2)),
-            z: 3 - Math.abs(index - 2),
-        };
-    }),
-);
-
-const cardStyle = (index: number) => {
-    const isSelected = selectedIndex.value === index;
-    const isHovered = hoveredIndex.value === index && selectedIndex.value === null;
-
-    if (isSelected) {
-        return {
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) rotate(0deg)',
-            transformOrigin: 'center center',
-            zIndex: 999999,
-        };
-    }
-
-    const layout = fanLayout.value[index];
-    return {
-        top: '58%',
-        transform: `
-            translate(-50%, -100%)
-            translate(${layout.x}rem, ${layout.y}rem)
-            rotate(${layout.angle}deg)
-        `,
-        transformOrigin: '50% 100%',
-        zIndex: isHovered ? 20 : layout.z,
-    };
-};
 
 const onCardEnter = (index: number) => {
     if (selectedIndex.value !== null) return;
@@ -132,10 +79,9 @@ const deselectCard = () => {
     selectedIndex.value = null;
 };
 
-const openAppDetail = (index: number) => {
-    if (selectedIndex.value !== index) return;
-    const app = apps.value[index]
-    if (app.type !== 'app') return
+const openAppDetail = () => {
+    const app = selectedApp.value
+    if (!app || app.type !== 'app') return
     emit('enter-app', app);
 };
 
@@ -153,12 +99,6 @@ const uiLabels = computed(() => ({
 
 onMounted(() => {
     imageStore.fetchImagePath();
-    updateViewport();
-    window.addEventListener('resize', updateViewport);
-});
-
-onUnmounted(() => {
-    window.removeEventListener('resize', updateViewport);
 });
 </script>
 
@@ -171,13 +111,8 @@ onUnmounted(() => {
         </div>
 
         <div class="hero-inner">
-            <div
-                v-if="selectedIndex !== null"
-                class="card-modal-backdrop"
-                @click="deselectCard"
-            ></div>
             <div class="stage" :class="{ 'has-selection': selectedIndex !== null }">
-                <div class="fan">
+                <div class="cards-row">
                     <article
                         v-for="(app, index) in apps"
                         :key="app.id"
@@ -186,25 +121,13 @@ onUnmounted(() => {
                             'is-app': app.type === 'app',
                             'is-empty': app.type === 'empty',
                             hovered: hoveredIndex === index && selectedIndex === null,
-                            selected: selectedIndex === index,
-                            dimmed: selectedIndex !== null && selectedIndex !== index,
+                            dimmed: selectedIndex !== null,
                         }"
-                        :style="cardStyle(index)"
                         @pointerenter="onCardEnter(index)"
                         @pointerleave="onCardLeave(index)"
                         @click="selectCard(index)"
                     >
                         <div class="card-face">
-                            <button
-                                v-if="selectedIndex === index"
-                                type="button"
-                                class="card-back"
-                                @click.stop="deselectCard"
-                            >
-                                <i class="fa-solid fa-arrow-left"></i>
-                                <span>{{ uiLabels.back }}</span>    
-                            </button>
-
                             <img
                                 v-if="app.type === 'app'"
                                 :src="app.imageUrl"
@@ -217,25 +140,24 @@ onUnmounted(() => {
                                 <span class="card-ghost short"></span>
                                 <span class="card-ghost shorter"></span>
                             </div>
-
-                            <button
-                                v-if="selectedIndex === index && app.type === 'app'"
-                                type="button"
-                                class="card-banner"
-                                @click.stop="openAppDetail(index)"
-                            >
-                                {{ uiLabels.moreInfo }}
-                            </button>
                         </div>
                     </article>
-                    <div v-if="arcBrand" class="arc-brand" aria-hidden="false">
-                        <img
-                            :src="arcBrand.src"
-                            :alt="arcBrand.alt"
-                            class="arc-brand-logo"
-                        >
-                    </div>
-                    <div class="hand-shadow" aria-hidden="true"></div>
+                </div>
+
+                <div v-if="arcBrand" class="arc-brand">
+                    <img
+                        :src="arcBrand.src"
+                        :alt="arcBrand.alt"
+                        class="arc-brand-logo"
+                    >
+                    <a
+                        href="https://www.iqathleticsoftware.com"
+                        class="arc-brand-link"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        www.iqathleticsoftware.com
+                    </a>
                 </div>
             </div>
 
@@ -271,6 +193,54 @@ onUnmounted(() => {
             </div>
         </div>
     </section>
+
+    <Teleport to="body">
+        <Transition name="card-modal">
+            <div v-if="selectedApp" class="card-modal-root">
+                <div
+                    class="card-modal-backdrop"
+                    @click="deselectCard"
+                ></div>
+                <article
+                    class="card selected is-app"
+                    :class="{ 'is-empty': selectedApp.type === 'empty' }"
+                >
+                    <div class="card-face">
+                        <button
+                            type="button"
+                            class="card-back"
+                            @click.stop="deselectCard"
+                        >
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>{{ uiLabels.back }}</span>
+                        </button>
+
+                        <img
+                            v-if="selectedApp.type === 'app'"
+                            :src="selectedApp.imageUrl"
+                            :alt="selectedApp.project"
+                            class="card-image"
+                        >
+
+                        <div v-else class="card-empty">
+                            <span class="card-ghost"></span>
+                            <span class="card-ghost short"></span>
+                            <span class="card-ghost shorter"></span>
+                        </div>
+
+                        <button
+                            v-if="selectedApp.type === 'app'"
+                            type="button"
+                            class="card-banner"
+                            @click.stop="openAppDetail"
+                        >
+                            {{ uiLabels.moreInfo }}
+                        </button>
+                    </div>
+                </article>
+            </div>
+        </Transition>
+    </Teleport>
 </template>
 
 <style scoped>
@@ -335,48 +305,44 @@ onUnmounted(() => {
     align-items: center;
     justify-content: flex-start;
     gap: 2rem;
-    padding: 9rem 2rem 3rem;
+    padding: 13.5rem 2rem 3rem;
     min-height: 64rem;
 }
 
 .stage {
     position: relative;
     width: min(100%, 118rem);
-    height: 46rem;
     flex-shrink: 0;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.8rem;
+    overflow: visible;
 }
 
-.fan {
-    position: relative;
+.cards-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 4rem;
     width: 100%;
-    height: 100%;
-}
-
-.hand-shadow {
-    position: absolute;
-    left: 50%;
-    top: 62%;
-    width: 78rem;
-    height: 6rem;
-    transform: translateX(-50%);
-    border-radius: 50%;
-    background: radial-gradient(ellipse, rgba(0, 0, 0, 0.68), transparent 72%);
-    filter: blur(14px);
-    pointer-events: none;
-    z-index: 0;
+    z-index: 2;
+    padding-top: 1.5rem;
 }
 
 .arc-brand {
-    position: absolute;
-    left: 50%;
-    top: 78%;
-    transform: translate(-50%, -50%);
-    z-index: 6;
-    pointer-events: none;
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    z-index: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 0.7rem;
+    pointer-events: none;
 }
 
 .arc-brand-logo {
@@ -387,24 +353,63 @@ onUnmounted(() => {
     opacity: 0.92;
 }
 
+.arc-brand-link {
+    pointer-events: auto;
+    color: rgba(220, 230, 245, 0.78);
+    font-family: var(--familyTitles);
+    font-size: 2rem;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.arc-brand-link:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
 .card {
-    position: absolute;
-    left: 50%;
-    top: 58%;
-    bottom: auto;
+    position: relative;
     width: 18rem;
     height: 26rem;
+    flex: 0 0 auto;
     box-sizing: border-box;
     cursor: pointer;
     border-radius: 1.6rem;
+    transform-origin: 50% 100%;
     transition:
-        transform 0.55s cubic-bezier(0.22, 0.85, 0.28, 1),
-        top 0.55s cubic-bezier(0.22, 0.85, 0.28, 1),
-        left 0.55s cubic-bezier(0.22, 0.85, 0.28, 1),
-        width 0.55s cubic-bezier(0.22, 0.85, 0.28, 1),
-        height 0.55s cubic-bezier(0.22, 0.85, 0.28, 1),
+        transform 0.35s cubic-bezier(0.22, 0.85, 0.28, 1),
         filter 0.35s ease,
         opacity 0.35s ease;
+}
+
+/* Arco suave: laterales más bajas e inclinadas */
+.cards-row .card:nth-child(1) {
+    transform: rotate(-10deg) translateY(2.2rem);
+}
+
+.cards-row .card:nth-child(2) {
+    transform: rotate(0deg) translateY(0);
+    z-index: 2;
+}
+
+.cards-row .card:nth-child(3) {
+    transform: rotate(10deg) translateY(2.2rem);
+}
+
+.cards-row .card:nth-child(1).hovered {
+    transform: rotate(-10deg) translateY(1.2rem) scale(1.04);
+    z-index: 3;
+}
+
+.cards-row .card:nth-child(2).hovered {
+    transform: rotate(0deg) translateY(-0.7rem) scale(1.04);
+    z-index: 3;
+}
+
+.cards-row .card:nth-child(3).hovered {
+    transform: rotate(10deg) translateY(1.2rem) scale(1.04);
+    z-index: 3;
 }
 
 .card.dimmed {
@@ -413,22 +418,61 @@ onUnmounted(() => {
     pointer-events: none;
 }
 
-.card-modal-backdrop {
+.card-modal-root {
     position: fixed;
     inset: 0;
     z-index: 999998;
+    pointer-events: none;
+}
+
+.card-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: auto;
     background: rgba(1, 3, 8, 0.72);
     backdrop-filter: blur(4px);
-    animation: appear 0.3s ease forwards;
 }
 
 .card.selected {
-    position: fixed;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    transform-origin: center center;
     cursor: default;
     width: min(92vw, 110rem);
     height: min(78vh, 64rem);
     border-radius: 1.4rem;
-    z-index: 999999;
+    z-index: 2;
+    pointer-events: auto;
+}
+
+.card-modal-enter-active,
+.card-modal-leave-active {
+    transition: opacity 0.38s ease;
+}
+
+.card-modal-enter-active .card.selected,
+.card-modal-leave-active .card.selected {
+    transition:
+        transform 0.42s cubic-bezier(0.22, 0.85, 0.28, 1),
+        opacity 0.38s ease;
+}
+
+.card-modal-enter-from,
+.card-modal-leave-to {
+    opacity: 0;
+}
+
+.card-modal-enter-from .card.selected {
+    transform: translate(-50%, -46%) scale(0.88);
+    opacity: 0;
+}
+
+.card-modal-leave-to .card.selected {
+    transform: translate(-50%, -48%) scale(0.92);
+    opacity: 0;
 }
 
 /* El resaltado va en la cara: el hitbox del .card NO se mueve */
@@ -794,11 +838,20 @@ onUnmounted(() => {
     }
 
     .hero-inner {
-        padding: 11rem 1.5rem 3rem;
+        padding: 14rem 1.5rem 3rem;
     }
 
-    .stage {
-        height: 42rem;
+    .cards-row {
+        gap: 2.8rem;
+    }
+
+    .cards-row .card:nth-child(1),
+    .cards-row .card:nth-child(3) {
+        transform: rotate(-8deg) translateY(1.6rem);
+    }
+
+    .cards-row .card:nth-child(3) {
+        transform: rotate(8deg) translateY(1.6rem);
     }
 
     .card {
@@ -811,17 +864,12 @@ onUnmounted(() => {
         height: min(72vh, 48rem);
     }
 
-    .hand-shadow {
-        width: 60rem;
-        top: 60%;
-    }
-
-    .arc-brand {
-        top: 76%;
-    }
-
     .arc-brand-logo {
         width: 7.5rem;
+    }
+
+    .arc-brand-link {
+        font-size: 1.6rem;
     }
 
     .card-back,
@@ -852,11 +900,19 @@ onUnmounted(() => {
 
     .hero-inner {
         min-height: 78rem;
-        padding-top: 12rem;
+        padding-top: 14.5rem;
     }
 
-    .stage {
-        height: 40rem;
+    .cards-row {
+        gap: 2rem;
+    }
+
+    .cards-row .card:nth-child(1) {
+        transform: rotate(-6deg) translateY(1.2rem);
+    }
+
+    .cards-row .card:nth-child(3) {
+        transform: rotate(6deg) translateY(1.2rem);
     }
 
     .card {
@@ -895,17 +951,12 @@ onUnmounted(() => {
         grid-row: 3;
     }
 
-    .hand-shadow {
-        width: 48rem;
-        top: 58%;
-    }
-
-    .arc-brand {
-        top: 74%;
-    }
-
     .arc-brand-logo {
         width: 6.5rem;
+    }
+
+    .arc-brand-link {
+        font-size: 1.35rem;
     }
 
     .card-back,
