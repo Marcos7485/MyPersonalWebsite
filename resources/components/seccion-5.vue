@@ -1,444 +1,545 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { Swiper, SwiperSlide } from "swiper/vue";
-import { Pagination, Autoplay } from 'swiper/modules';
-import { useLanguageStore } from '../store/language.ts';
-import { inject } from 'vue';
-import { useImageStore } from '../store/imageStore.ts';
+import { ref, computed, onMounted } from 'vue'
+import type { Swiper as SwiperInstance } from 'swiper'
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { Autoplay } from 'swiper/modules'
+import { useLanguageStore } from '../store/language.ts'
+import { useImageStore } from '../store/imageStore.ts'
 
+interface Review {
+    id: number
+    name: string
+    stars: number
+    opinion: string
+}
 
 const props = defineProps<{ reviews: Review[] }>()
 
-const imageStore = useImageStore();
+const imageStore = useImageStore()
+const languageStore = useLanguageStore()
+
 onMounted(() => {
-    imageStore.fetchImagePath();
-});
+    imageStore.fetchImagePath()
+})
 
+const ReviewsObs = ref(false)
+const swiperRef = ref<SwiperInstance | null>(null)
 
-interface Review {
-    id: number;
-    name: string;
-    stars: number;
-    opinion: string;
+const ReviewsAnimate = () => {
+    ReviewsObs.value = true
 }
 
-const reviews = inject<Array<Review> | undefined>('reviews', []);
+const onSwiper = (swiper: SwiperInstance) => {
+    swiperRef.value = swiper
+}
 
-const languageStore = useLanguageStore();
+const goPrev = () => swiperRef.value?.slidePrev()
+const goNext = () => swiperRef.value?.slideNext()
 
-const ReviewsObs = ref<boolean>(false);
+const reviewCount = computed(() =>
+    Array.isArray(props.reviews) ? props.reviews.length : 0,
+)
 
-const ReviewsAnimate = (el: HTMLElement) => {
-    ReviewsObs.value = true;
-};
-
-const cantidadDeReviews = Array.isArray(props.reviews) ? props.reviews.length : 0;
-
+const hasReviews = computed(() => reviewCount.value > 0)
 </script>
 
 <template>
-    <section id="Reviews" v-intersect="ReviewsAnimate">
-        <div class="content-5">
-            <h1 :class="{ active: ReviewsObs }">{{ languageStore.t('reviews.title') }} ({{ cantidadDeReviews }})</h1>
-            <h2 :class="{ active: ReviewsObs }">{{ languageStore.t('reviews.subtitle') }}</h2>
-            <div class="path3" :class="{ active: ReviewsObs }"></div>
-            <div id="form-arrowRight" :class="{ active: ReviewsObs }"></div>
-            <div id="form-arrowLeft" :class="{ active: ReviewsObs }"></div>
+    <section id="Reviews" class="reviews" v-intersect="ReviewsAnimate">
+        <div class="reviews-inner" :class="{ active: ReviewsObs }">
+            <div class="reviews-line reviews-line--top" aria-hidden="true"></div>
+            <div class="reviews-line reviews-line--bottom" aria-hidden="true"></div>
 
-            <Swiper :modules="[Pagination, Autoplay]" :grabCursor="true" :loop="true" :pagination="false"
-                :autoplay="{ delay: 2000, disableOnInteraction: false }">
-                <SwiperSlide v-for="review in props.reviews" :key="review.id">
-                    <div class="item-review" :class="{ active: ReviewsObs }">
-                        <div class="stars" v-for="puntuacion in review.stars">
-                            <i class="fa-solid fa-star"></i>
-                        </div>
-                        <div class="element">
-                            <div class="nombre">
-                                <p>{{ review.name }}</p>
-                            </div>
-                            <div class="opinion">
-                                <p>{{ review.opinion }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </SwiperSlide>
-            </Swiper>
+            <div class="reviews-art" aria-hidden="true">
+                <div class="fig fig-1">
+                    <img :src="`${imageStore.imagePath}/seccion-5/figura1.svg`" alt="">
+                </div>
+                <div class="fig fig-2">
+                    <img :src="`${imageStore.imagePath}/seccion-5/figura2.svg`" alt="">
+                </div>
+                <div class="fig fig-3">
+                    <img :src="`${imageStore.imagePath}/seccion-5/figura3.svg`" alt="">
+                </div>
+                <div class="fig fig-4">
+                    <img :src="`${imageStore.imagePath}/seccion-5/figura4.svg`" alt="">
+                </div>
+            </div>
 
-            <div id="fig1" :class="{ active: ReviewsObs }"><img :src="`${imageStore.imagePath}/seccion-5/figura1.svg`">
+            <header class="reviews-head">
+                <h1>
+                    {{ languageStore.t('reviews.title') }}
+                    <span class="reviews-count">({{ reviewCount }})</span>
+                </h1>
+                <p class="reviews-sub">{{ languageStore.t('reviews.subtitle') }}</p>
+            </header>
+
+            <div class="reviews-stage">
+                <button
+                    type="button"
+                    class="reviews-nav reviews-nav--prev"
+                    :disabled="!hasReviews"
+                    :aria-label="languageStore.t('reviews.title') + ' anterior'"
+                    @click="goPrev"
+                >
+                    <span class="reviews-nav-shape" aria-hidden="true"></span>
+                </button>
+
+                <div class="reviews-slider">
+                    <Swiper
+                        v-if="hasReviews"
+                        :modules="[Autoplay]"
+                        :grab-cursor="true"
+                        :loop="reviewCount > 1"
+                        :autoplay="{
+                            delay: 3500,
+                            disableOnInteraction: true,
+                            pauseOnMouseEnter: true,
+                        }"
+                        @swiper="onSwiper"
+                    >
+                        <SwiperSlide v-for="review in props.reviews" :key="review.id">
+                            <article class="review-item">
+                                <div
+                                    class="review-stars"
+                                    :aria-label="`${review.stars} estrellas`"
+                                >
+                                    <i
+                                        v-for="n in review.stars"
+                                        :key="`${review.id}-star-${n}`"
+                                        class="fa-solid fa-star"
+                                    ></i>
+                                </div>
+                                <p class="review-name">{{ review.name }}</p>
+                                <p class="review-opinion">{{ review.opinion }}</p>
+                            </article>
+                        </SwiperSlide>
+                    </Swiper>
+
+                    <p v-else class="reviews-empty">—</p>
+                </div>
+
+                <button
+                    type="button"
+                    class="reviews-nav reviews-nav--next"
+                    :disabled="!hasReviews"
+                    :aria-label="languageStore.t('reviews.title') + ' siguiente'"
+                    @click="goNext"
+                >
+                    <span class="reviews-nav-shape" aria-hidden="true"></span>
+                </button>
             </div>
-            <div id="fig2" :class="{ active: ReviewsObs }"><img :src="`${imageStore.imagePath}/seccion-5/figura2.svg`">
-            </div>
-            <div id="fig3" :class="{ active: ReviewsObs }"><img :src="`${imageStore.imagePath}/seccion-5/figura3.svg`">
-            </div>
-            <div id="fig4" :class="{ active: ReviewsObs }"><img :src="`${imageStore.imagePath}/seccion-5/figura4.svg`">
-            </div>
-            <div class="path4" :class="{ active: ReviewsObs }"></div>
         </div>
     </section>
 </template>
 
 <style scoped>
-.swiper {
-    top: 15rem;
-    width: 60rem;
-    height: 25rem;
+.reviews {
+    --reviews-bg: #02060c;
+    --reviews-red: var(--color-first);
+    position: relative;
+    width: 100%;
+    color: white;
+    background:
+        radial-gradient(ellipse 70% 50% at 50% 20%, rgba(18, 40, 72, 0.35), transparent 65%),
+        var(--reviews-bg);
     overflow: hidden;
 }
 
-.swiper-slide p {
+.reviews-inner {
+    position: relative;
     width: 100%;
-    height: 100%;
+    min-height: 52rem;
+    padding: 6rem 4rem 7rem;
+    box-sizing: border-box;
 }
 
-
-#fig4.active img {
-    animation: translateImgOposite 1s 1.5s forwards;
-}
-
-#fig4 img {
+.reviews-line {
     position: absolute;
-    width: 35rem;
-    bottom: 9rem;
-    right: 5rem;
+    left: 0;
+    width: 100%;
+    height: 0.35rem;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.85), transparent) no-repeat;
+    background-size: 200% 100%;
+    background-position: -100% 0;
     opacity: 0;
+    z-index: 2;
+    pointer-events: none;
 }
 
-#fig3.active img {
-    animation: translateImgOposite 1s 1s forwards;
+.reviews-line--top {
+    top: 4.5rem;
 }
 
-#fig3 img {
+.reviews-line--bottom {
+    bottom: 4.5rem;
+}
+
+.reviews-inner.active .reviews-line {
+    animation: drawLine 0.9s 0.35s linear forwards;
+}
+
+/* Figuras de marca */
+.reviews-art {
     position: absolute;
-    width: 25rem;
-    bottom: 9rem;
-    right: 5rem;
-    opacity: 0;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
 }
 
-#fig2.active img {
-    animation: translateImg 1s 1.5s ease forwards;
-}
-
-#fig2 img {
+.fig {
     position: absolute;
-    width: 10rem;
-    bottom: 10.5rem;
-    left: 15rem;
     opacity: 0;
 }
 
-#fig1.active img {
-    animation: translateImg 1s 1s ease forwards;
+.fig img {
+    display: block;
+    width: 100%;
+    height: auto;
 }
 
-#fig1 img {
-    position: absolute;
-    width: 25rem;
-    top: 10rem;
-    left: 2rem;
+.fig-1 {
+    top: 8rem;
+    left: 1.5rem;
+    width: 22rem;
+}
+
+.fig-2 {
+    bottom: 8rem;
+    left: 12rem;
+    width: 9rem;
+}
+
+.fig-3 {
+    bottom: 7rem;
+    right: 6rem;
+    width: 22rem;
+}
+
+.fig-4 {
+    bottom: 7rem;
+    right: 4rem;
+    width: 30rem;
+}
+
+.reviews-inner.active .fig-1 {
+    animation: slideInLeft 0.85s 0.45s ease forwards;
+}
+
+.reviews-inner.active .fig-2 {
+    animation: slideInLeft 0.85s 0.7s ease forwards;
+}
+
+.reviews-inner.active .fig-3 {
+    animation: slideInRight 0.85s 0.55s ease forwards;
+}
+
+.reviews-inner.active .fig-4 {
+    animation: slideInRight 0.85s 0.75s ease forwards;
+}
+
+/* Cabecera */
+.reviews-head {
+    position: relative;
+    z-index: 3;
+    max-width: 70rem;
+    margin: 0 auto 3rem;
+    text-align: center;
     opacity: 0;
+    transform: translateY(1.2rem);
 }
 
-#form-arrowRight.active {
-    animation: latitud 2s 2.5s ease infinite;
+.reviews-inner.active .reviews-head {
+    animation: fadeUp 0.75s 0.2s ease forwards;
 }
 
-#form-arrowRight {
-    position: absolute;
-    height: 5rem;
-    width: 4rem;
-    top: 22rem;
-    right: 26rem;
-    clip-path: polygon(0 0, 100% 50%, 0 100%, 0% 100%, 25% 50%, 0% 0%);
-    background-color: white;
-    z-index: 100;
+.reviews-head h1 {
+    margin: 0;
+    font-family: var(--familyTitles), Georgia, serif;
+    font-size: clamp(3.2rem, 5vw, var(--fontsizeTitles));
+    font-weight: 900;
+    color: #f4f7fb;
+    letter-spacing: 0.02em;
+}
+
+.reviews-count {
+    color: var(--reviews-red);
+    font-weight: 400;
+}
+
+.reviews-sub {
+    margin: 1.2rem auto 0;
+    max-width: 56rem;
+    font-size: clamp(1.5rem, 2vw, var(--fontsize));
+    line-height: 1.45;
+    color: rgba(220, 230, 245, 0.78);
+}
+
+/* Stage + swiper */
+.reviews-stage {
+    position: relative;
+    z-index: 4;
+    display: grid;
+    grid-template-columns: auto minmax(0, 58rem) auto;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    margin: 0 auto;
     opacity: 0;
+    transform: translateY(1.4rem);
 }
 
-#form-arrowLeft.active {
-    animation: latitud 2s 2.5s ease infinite;
+.reviews-inner.active .reviews-stage {
+    animation: fadeUp 0.75s 0.4s ease forwards;
 }
 
-#form-arrowLeft {
-    position: absolute;
-    height: 5rem;
-    width: 4rem;
-    top: 22rem;
-    left: 26rem;
-    clip-path: polygon(100% 0%, 75% 50%, 100% 100%, 100% 100%, 0% 50%, 100% 0);
-    background-color: white;
-    z-index: 100;
-    opacity: 0;
+.reviews-slider {
+    min-width: 0;
+    width: min(58rem, 100%);
 }
 
-.nombre {
-    color: var(--color-first);
+.reviews-slider :deep(.swiper) {
+    width: 100%;
+    overflow: hidden;
 }
 
-.opinion {
-    color: white;
-    font-size: var(--fontsize);
-}
-
-.item-review.active {
-    animation: appear 1s ease forwards;
-}
-
-.item-review {
-    margin-top: 5rem;
-    opacity: 0;
-}
-
-.stars {
-    display: inline;
-    margin-right: 5px;
-}
-
-.stars i {
-    color: gold;
-}
-
-.element {
+.review-item {
     display: flex;
     flex-direction: column;
-    margin-top: 1rem;
     align-items: center;
-}
-
-.path4.active {
-    animation: drawLineSecond 1s 1s linear forwards;
-}
-
-.path4 {
-    position: absolute;
-    top: 10rem;
-    left: 0;
-    width: 100%;
-    height: .4rem;
-    background: linear-gradient(to right, white, transparent) no-repeat;
-    background-size: 200% 100%;
-    z-index: 10;
-    opacity: 0;
-}
-
-.path3.active {
-    animation: drawLineSecond 1s 1s linear forwards;
-}
-
-.path3 {
-    position: absolute;
-    bottom: 10rem;
-    left: 0;
-    width: 100%;
-    height: .4rem;
-    background: linear-gradient(to right, white, transparent) no-repeat;
-    background-size: 200% 100%;
-    z-index: 10;
-    opacity: 0;
-}
-
-.content-5 h2.active {
-    animation: translateImgOposite 1s 2s forwards;
-}
-
-.content-5 h2 {
-    color: white;
-    font-size: var(--fontsize);
-    position: absolute;
-    top: 15rem;
     text-align: center;
-    left: 8rem;
-    width: 90%;
-    opacity: 0;
+    padding: 2.5rem 1.5rem 1rem;
+    min-height: 18rem;
+    box-sizing: border-box;
 }
 
-.content-5 h1.active {
-    animation: translateImgOposite 1s 2s forwards;
+.review-stars {
+    display: flex;
+    gap: 0.45rem;
+    margin-bottom: 1.4rem;
 }
 
-.content-5 h1 {
-    color: white;
-    font-size: var(--fontsizeTitles);
-    position: absolute;
-    top: 5rem;
-    left: 2rem;
-    opacity: 0;
+.review-stars i {
+    color: gold;
+    font-size: 1.8rem;
+    filter: drop-shadow(0 0 0.35rem rgba(255, 200, 50, 0.35));
 }
 
-.content-5 {
-    height: 50rem;
-    width: 100%;
-    position: relative;
-    font-size: var(--fontsize);
-    overflow-y: hidden;
-    overflow-X: hidden;
+.review-name {
+    margin: 0 0 1rem;
+    font-family: var(--familyTitles), Georgia, serif;
+    font-size: clamp(2rem, 2.4vw, 2.6rem);
+    color: var(--reviews-red);
 }
 
-@keyframes latitud {
-
-    50% {
-        opacity: 1;
-    }
+.review-opinion {
+    margin: 0;
+    max-width: 48rem;
+    font-size: clamp(1.6rem, 2vw, var(--fontsize));
+    line-height: 1.5;
+    color: rgba(245, 248, 255, 0.92);
 }
 
-@keyframes appear {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
+.reviews-empty {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 2rem;
+    padding: 4rem 0;
 }
 
+/* Flechas de marca (clip-path) */
+.reviews-nav {
+    appearance: none;
+    border: none;
+    background: transparent;
+    padding: 0.6rem;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
 
-@keyframes drawLineSecond {
+.reviews-nav:hover:not(:disabled) {
+    opacity: 1;
+    transform: scale(1.08);
+}
+
+.reviews-nav:disabled {
+    opacity: 0.25;
+    cursor: default;
+}
+
+.reviews-nav-shape {
+    display: block;
+    width: 3.2rem;
+    height: 4.2rem;
+    background: #fff;
+}
+
+.reviews-nav--prev .reviews-nav-shape {
+    clip-path: polygon(100% 0%, 75% 50%, 100% 100%, 100% 100%, 0% 50%, 100% 0);
+}
+
+.reviews-nav--next .reviews-nav-shape {
+    clip-path: polygon(0 0, 100% 50%, 0 100%, 0% 100%, 25% 50%, 0% 0%);
+}
+
+.reviews-inner.active .reviews-nav {
+    animation: pulseNav 2.2s 1.1s ease-in-out infinite;
+}
+
+@keyframes drawLine {
     0% {
         background-position: -100% 0;
+        opacity: 0;
     }
-
     100% {
         background-position: 100% 0;
         opacity: 1;
     }
 }
 
-@keyframes translateImgOposite {
+@keyframes fadeUp {
     from {
-        transform: translateX(-10rem);
+        opacity: 0;
+        transform: translateY(1.4rem);
     }
-
     to {
+        opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-8rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(8rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulseNav {
+    0%,
+    100% {
+        opacity: 0.75;
+    }
+    50% {
         opacity: 1;
     }
 }
 
-@keyframes translateImg {
-    from {
-        transform: translateX(20rem);
+@media (max-width: 900px) {
+    .reviews-inner {
+        min-height: 54rem;
+        padding: 5rem 2rem 6rem;
     }
 
-    to {
-        transform: translateY(0);
-        opacity: 1;
+    .fig-1 {
+        width: 16rem;
+        top: 7rem;
+        left: 0.5rem;
+        opacity: 0;
+    }
+
+    .fig-2 {
+        width: 7rem;
+        left: 4rem;
+        bottom: 6rem;
+    }
+
+    .fig-3 {
+        width: 14rem;
+        right: 2rem;
+        bottom: 5.5rem;
+    }
+
+    .fig-4 {
+        width: 18rem;
+        right: 1rem;
+        bottom: 5.5rem;
+    }
+
+    .reviews-stage {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 1rem;
+        width: 100%;
+    }
+
+    .reviews-slider {
+        width: 100%;
     }
 }
 
 @media (max-width: 600px) {
-
-
-    .swiper {
-        top: 15rem;
-        width: 55rem;
-        height: 35rem;
-        overflow: hidden;
+    .reviews-inner {
+        min-height: 58rem;
+        padding: 5rem 1.2rem 5.5rem;
     }
 
-    .swiper-slide p {
-        width: 100%;
-        height: 100%;
+    .reviews-line--top {
+        top: 3.5rem;
     }
 
-
-    .nombre {
-        color: var(--color-first);
-        margin-left: -1rem;
+    .reviews-line--bottom {
+        bottom: 3.5rem;
     }
 
-
-    #fig4 img {
-        position: absolute;
-        width: 15rem;
-        bottom: 9rem;
-        right: 5rem;
-        opacity: 0;
+    .fig-1 {
+        width: 12rem;
+        top: 6rem;
+        left: -1rem;
+        opacity: 0.9;
     }
 
-    #fig3 img {
-        position: absolute;
-        width: 15rem;
-        bottom: 9rem;
-        left: 60%;
-        opacity: 0;
+    .fig-2 {
+        width: 5.5rem;
+        left: 1rem;
+        bottom: 5rem;
     }
 
-    #fig2 img {
-        position: absolute;
-        width: 8rem;
-        bottom: 10.5rem;
-        left: 5rem;
-        opacity: 0;
+    .fig-3 {
+        width: 11rem;
+        right: -0.5rem;
+        bottom: 4.5rem;
     }
 
-    #fig1 img {
-        position: absolute;
-        width: 15rem;
-        top: 10rem;
-        left: 2rem;
-        opacity: 0;
+    .fig-4 {
+        width: 14rem;
+        right: -1rem;
+        bottom: 4.5rem;
     }
 
-    #form-arrowRight {
-        position: absolute;
-        height: 5rem;
-        width: 2rem;
-        top: 22rem;
-        right: 7rem;
-        clip-path: polygon(0 0, 100% 50%, 0 100%, 0% 100%, 25% 50%, 0% 0%);
-        background-color: white;
-        z-index: 100;
-        opacity: 0;
+    .reviews-head {
+        margin-bottom: 2rem;
     }
 
-    #form-arrowLeft {
-        position: absolute;
-        height: 5rem;
-        width: 2rem;
-        top: 22rem;
-        left: 7rem;
-        clip-path: polygon(100% 0%, 75% 50%, 100% 100%, 100% 100%, 0% 50%, 100% 0);
-        background-color: white;
-        z-index: 100;
-        opacity: 0;
+    .reviews-stage {
+        gap: 0.4rem;
     }
 
-    .item-review {
-        margin-top: 5rem;
-        width: 100%;
-        opacity: 0;
-        z-index: 100;
+    .reviews-nav-shape {
+        width: 2.2rem;
+        height: 3.2rem;
     }
 
-    .content-5 h2 {
-        color: white;
-        font-size: var(--fontsize);
-        position: absolute;
-        top: 12rem;
-        text-align: center;
-        left: 3rem;
-        width: 90%;
-        z-index: 100;
-        opacity: 0;
+    .review-item {
+        padding: 1.5rem 0.4rem;
+        min-height: 20rem;
     }
 
-    .content-5 h1 {
-        color: white;
-        font-size: var(--fontsizeTitles);
-        position: absolute;
-        top: 5rem;
-        left: 2rem;
-        opacity: 0;
+    .review-stars i {
+        font-size: 1.5rem;
     }
-
-    .content-5 {
-        height: 50rem;
-        width: 100%;
-        position: relative;
-        font-size: var(--fontsize);
-        overflow-y: hidden;
-        overflow-X: hidden;
-    }
-
 }
 </style>

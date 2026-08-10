@@ -97,7 +97,16 @@ onMounted(() => {
                 <!-- Hueco de las cards: ancla del único dragón (Header lo teleporta aquí) -->
                 <div class="cards-row">
                     <div class="dragon-block">
-                        <div id="dragon-dock" class="dragon-dock"></div>
+                        <!-- Spacer reserva el tamaño final todo el tiempo; el logo real se teleporta encima -->
+                        <div id="dragon-dock" class="dragon-dock">
+                            <img
+                                class="dragon-dock-spacer"
+                                :src="`${imageStore.imagePath || '/images'}/drs.webp`"
+                                alt=""
+                                aria-hidden="true"
+                                decoding="async"
+                            >
+                        </div>
                         <p class="dragon-tagline">{{ uiLabels.heroTagline }}</p>
                     </div>
                 </div>
@@ -334,10 +343,20 @@ onMounted(() => {
 }
 
 .dragon-dock {
+    position: relative;
     width: 100%;
-    min-height: min(20rem, 34vw);
-    display: grid;
-    place-items: center;
+    /* Espacio fijo del dragón aparcado: no crece al teletransportar el logo */
+    display: block;
+    flex-shrink: 0;
+}
+
+.dragon-dock-spacer {
+    width: 100%;
+    height: auto;
+    display: block;
+    visibility: hidden;
+    pointer-events: none;
+    user-select: none;
 }
 
 .dragon-tagline {
@@ -1173,24 +1192,20 @@ onMounted(() => {
         gap: 0.8rem;
     }
 
-    .dragon-dock {
-        min-height: min(16rem, 44vw);
-    }
-
     .dragon-tagline {
         font-size: clamp(1.6rem, 5vw, 2.1rem);
     }
 
     .arc-brand {
-        gap: 0.4rem;
+        gap: 0.7rem;
     }
 
     .arc-brand-logo {
-        width: 6.5rem;
+        width: 11rem;
     }
 
     .arc-brand-link {
-        font-size: 1.35rem;
+        font-size: 2rem;
     }
 
     .about {
@@ -1198,9 +1213,9 @@ onMounted(() => {
     }
 
     .about-trigger {
-        font-size: 1.4rem;
-        padding: 1.1rem 1.4rem;
-        gap: 0.8rem;
+        font-size: 1.85rem;
+        padding: 1.25rem 1.5rem;
+        gap: 0.9rem;
     }
 
     .about-panel-inner {

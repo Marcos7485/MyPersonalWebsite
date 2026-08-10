@@ -79,21 +79,38 @@ const submitForm = async () => {
                     <div>
                         <input type="hidden" v-model="formData.language" />
                     </div>
-                    <div>
-                        <input v-model="formData.name" type="text"
+                    <div class="form-field">
+                        <input
+                            class="form-input"
+                            v-model="formData.name"
+                            type="text"
                             :placeholder="languageStore.t('contact.name')"
-                            required>
+                            autocomplete="name"
+                            required
+                        >
                     </div>
-                    <div>
-                        <input v-model="formData.phone" type="number"
+                    <div class="form-field">
+                        <input
+                            class="form-input"
+                            v-model="formData.phone"
+                            type="tel"
                             :placeholder="languageStore.t('contact.phone')"
-                            required>
+                            autocomplete="tel"
+                            required
+                        >
                     </div>
-                    <div>
-                        <input v-model="formData.email" type="email" :placeholder="languageStore.t('contact.email')" required>
+                    <div class="form-field">
+                        <input
+                            class="form-input"
+                            v-model="formData.email"
+                            type="email"
+                            :placeholder="languageStore.t('contact.email')"
+                            autocomplete="email"
+                            required
+                        >
                     </div>
-                    <div>
-                        <button class="btn" type="submit" :disabled="isDisabled">
+                    <div class="form-field">
+                        <button class="form-submit" type="submit" :disabled="isDisabled">
                             <span>{{ languageStore.t('contact.submit') }}</span>
                         </button>
                     </div>
@@ -171,27 +188,104 @@ const submitForm = async () => {
     color: green;
 }
 
-.form-contacto button {
-    background: linear-gradient(to right, var(--color-first), transparent);
-    border: solid 2px white;
-    font-size: var(--fontsize);
-    color: white;
-    border-radius: 1rem 4rem;
-    padding: .5rem;
-    margin-top: 1rem;
-    transition: box-shadow .3s;
-}
-
-.form-contacto button:hover {
-    box-shadow: 2px 2px 20px var(--color-first);
-}
-
-.form-contacto input {
-    font-size: var(--fontsize);
-    border-radius: 1rem 4rem;
-    padding: .5rem;
+.form-contacto button,
+.form-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 35rem;
+    max-width: 100%;
+    box-sizing: border-box;
+    background: linear-gradient(135deg, var(--color-first) 0%, #7a1010 55%, #4a0808 100%);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    font-family: var(--familyTitles), Georgia, serif;
+    font-size: var(--fontsize);
+    color: #fff;
+    border-radius: 1rem 3.5rem;
+    padding: 0.85rem 1.6rem;
+    margin-top: 0.6rem;
+    cursor: pointer;
+    box-shadow:
+        0 0.6rem 1.6rem rgba(0, 0, 0, 0.35),
+        0 0 0 rgba(170, 24, 24, 0);
+    transition:
+        box-shadow 0.25s ease,
+        transform 0.2s ease,
+        filter 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.form-contacto button:hover:not(:disabled),
+.form-submit:hover:not(:disabled) {
+    filter: brightness(1.08);
+    border-color: rgba(255, 255, 255, 0.55);
+    box-shadow:
+        0 0.8rem 2rem rgba(0, 0, 0, 0.4),
+        0 0 1.6rem rgba(170, 24, 24, 0.45);
+    transform: translateY(-0.15rem);
+}
+
+.form-contacto button:active:not(:disabled),
+.form-submit:active:not(:disabled) {
+    transform: translateY(0);
+    filter: brightness(0.96);
+}
+
+.form-contacto button:disabled,
+.form-submit:disabled {
+    opacity: 0.55;
+    cursor: wait;
+    filter: grayscale(0.2);
+}
+
+.form-contacto button:focus-visible,
+.form-submit:focus-visible {
+    outline: 2px solid rgba(255, 200, 200, 0.7);
+    outline-offset: 3px;
+}
+
+.form-field {
+    margin: 0;
+}
+
+.form-contacto input,
+.form-input {
+    font-size: var(--fontsize);
+    font-family: inherit;
+    color: #15171a;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1rem 3.5rem;
+    padding: 0.85rem 1.6rem;
+    width: 35rem;
+    max-width: 100%;
     margin-bottom: 1rem;
+    box-sizing: border-box;
+    box-shadow: 0 0.4rem 1.2rem rgba(0, 0, 0, 0.18);
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.form-contacto input::placeholder,
+.form-input::placeholder {
+    color: rgba(40, 45, 55, 0.45);
+}
+
+.form-contacto input:hover,
+.form-input:hover {
+    border-color: rgba(170, 24, 24, 0.35);
+}
+
+.form-contacto input:focus,
+.form-input:focus {
+    outline: none;
+    background: #fff;
+    border-color: var(--color-first);
+    box-shadow:
+        0 0.5rem 1.4rem rgba(0, 0, 0, 0.22),
+        0 0 0 0.25rem rgba(170, 24, 24, 0.22);
 }
 
 .form-contacto.active {

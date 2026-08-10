@@ -4,7 +4,7 @@ import { useImageStore } from '../store/imageStore';
 import LanguagesSelector from './LanguagesSelector.vue';
 
 const props = withDefaults(defineProps<{
-  /** loading: splash | docking: ajuste leve | done: quieto en #dragon-dock */
+  /** loading: splash | docking: vuelo al dock | done: quieto en #dragon-dock */
   introPhase?: 'loading' | 'docking' | 'done'
 }>(), {
   introPhase: 'done',
@@ -20,6 +20,8 @@ imageStore.fetchImagePath();
 
 const isMobile = ref(window.innerWidth <= 600);
 const isReady = ref(false);
+/** Chrome (letras + idioma) ya en su sitio, sin animación de entrada que mueva el layout */
+const chromeSettled = ref(false);
 const logoRef = ref<HTMLElement | null>(null);
 const logoAnchorRef = ref<HTMLElement | null>(null);
 const logoSettling = ref(false);
@@ -29,32 +31,25 @@ const logoTeleportTarget = computed(() =>
   props.introPhase === 'done' ? '#dragon-dock' : 'body',
 )
 
-/** Destino casi en el mismo sitio: solo un leve ajuste de tamaño */
-const DOCK_MS = 680
-const REVEAL_AT = 0.35
+/** Duraciones: vuelo visible + settle FLIP */
+const DOCK_MS = 1100
+const SETTLE_MS = 480
+/** Revelar página cuando el dragón ya va a mitad de camino */
+const REVEAL_AT = 0.28
 
 let nearTimer: ReturnType<typeof setTimeout> | null = null
 let doneTimer: ReturnType<typeof setTimeout> | null = null
+
+const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
 
 const updateLayout = () => {
   isMobile.value = window.innerWidth <= 600;
   if (props.introPhase === 'loading') placeSplash()
 };
 
-/** Publica el borde inferior del dragón para que la barra de carga lo siga */
 const publishSplashBottom = (bottom: number) => {
   document.documentElement.style.setProperty('--splash-bottom', `${bottom}px`)
 };
-
-const getScrollbarWidth = () => {
-  const probe = document.createElement('div')
-  probe.style.cssText =
-    'position:absolute;top:-9999px;width:100px;height:100px;overflow:scroll;visibility:hidden'
-  document.body.appendChild(probe)
-  const width = probe.offsetWidth - probe.clientWidth
-  document.body.removeChild(probe)
-  return width
-}
 
 const clearLogoInline = () => {
   const el = logoRef.value
@@ -73,28 +68,22 @@ const clearLogoInline = () => {
   el.style.opacity = ''
 }
 
-const getDockAnchor = () => {
-  return document.getElementById('dragon-dock') || logoAnchorRef.value
-}
+const getDockAnchor = () => document.getElementById('dragon-dock') || logoAnchorRef.value
 
 const getDockTarget = (anchor: HTMLElement) => {
   const rect = anchor.getBoundingClientRect()
-  const currentSb = window.innerWidth - document.documentElement.clientWidth
-  const realSb = getScrollbarWidth()
-  const compensate = Math.max(0, realSb - currentSb)
-
   return {
-    left: rect.left - compensate,
+    left: rect.left,
     top: rect.top,
     width: rect.width,
-    centerX: rect.left + rect.width / 2 - compensate,
+    height: rect.height,
+    centerX: rect.left + rect.width / 2,
     centerY: rect.top + rect.height / 2,
   }
 }
 
 /**
- * Splash del dragón: en móvil al centro de la pantalla, en desktop ya sobre el
- * dock para que después casi no viaje.
+ * Splash: siempre grande y centrado en pantalla (viaje claro hacia el dock).
  */
 const placeSplash = async () => {
   await nextTick()
@@ -111,23 +100,17 @@ const placeSplash = async () => {
     })
   }
 
-  const mobile = isMobile.value
-  const anchor = mobile ? null : getDockAnchor()
-  const dock = anchor ? getDockTarget(anchor) : null
-  const maxRatio = mobile ? 0.72 : 0.55
-  const splashW = dock
-    ? Math.min(dock.width * 1.06, window.innerWidth * maxRatio, 400)
-    : Math.min(window.innerWidth * maxRatio, 380)
-
-  const centerX = dock ? dock.centerX : window.innerWidth / 2
-  const centerY = dock ? dock.centerY : window.innerHeight * 0.44
+  const splashW = Math.min(
+    window.innerWidth * (isMobile.value ? 0.7 : 0.42),
+    isMobile.value ? 320 : 440,
+  )
 
   logoSettling.value = false
 
   el.style.transition = 'none'
   el.style.position = 'fixed'
-  el.style.left = `${centerX}px`
-  el.style.top = `${centerY}px`
+  el.style.left = `${window.innerWidth / 2}px`
+  el.style.top = `${window.innerHeight * 0.42}px`
   el.style.width = `${splashW}px`
   el.style.height = 'auto'
   el.style.right = 'auto'
@@ -141,46 +124,91 @@ const placeSplash = async () => {
   publishSplashBottom(el.getBoundingClientRect().bottom)
 }
 
-/** Leve encaje al tamaño del dock; el velo se abre sin ocultar el dragón */
+const waitForImage = (img: HTMLImageElement | null) =>
+  new Promise<void>((resolve) => {
+    if (!img) {
+      resolve()
+      return
+    }
+    if (img.complete && img.naturalWidth > 0) {
+      resolve()
+      return
+    }
+    const done = () => resolve()
+    img.addEventListener('load', done, { once: true })
+    img.addEventListener('error', done, { once: true })
+  })
+
+/**
+ * Deja letras + idioma ya en su lugar (bajo el velo) antes de medir el dock
+ * y volar el dragón. Así no “aparecen después” al abrir la página.
+ */
+const prepareChrome = async () => {
+  isReady.value = true
+  chromeSettled.value = true
+  await nextTick()
+  await nextTick()
+
+  const letterImgs = document.querySelectorAll<HTMLImageElement>(
+    '.letters .brand-letters img, .lettersMobile .brand-letters img',
+  )
+  await Promise.all([...letterImgs].map((img) => waitForImage(img)))
+  await nextTick()
+}
+
+/**
+ * Vuelo suave del centro → #dragon-dock, mientras se revela la página.
+ * El dragón permanece fixed y visible todo el tiempo.
+ */
 const playDock = async () => {
   await nextTick()
   const el = logoRef.value
-  const anchor = getDockAnchor()
 
+  // Chrome listo ANTES de revelar / medir (evita reacomodo al aparecer letras)
+  goScrollTop()
+  await prepareChrome()
+
+  const anchor = getDockAnchor()
   if (!el || !anchor) {
     emit('dock-near-end')
     emit('dock-done')
     return
   }
 
+  await nextTick()
   const to = getDockTarget(anchor)
   const from = el.getBoundingClientRect()
 
+  // Anclar por centro para no “saltar” al quitar translate
   el.style.transition = 'none'
   el.style.position = 'fixed'
-  el.style.left = `${from.left}px`
-  el.style.top = `${from.top}px`
+  el.style.left = `${from.left + from.width / 2}px`
+  el.style.top = `${from.top + from.height / 2}px`
   el.style.width = `${from.width}px`
   el.style.right = 'auto'
   el.style.margin = '0'
   el.style.zIndex = '100002'
   el.style.opacity = '1'
-  el.style.transform = 'none'
+  el.style.transform = 'translate(-50%, -50%)'
+  el.style.transformOrigin = 'center center'
 
   void el.offsetWidth
 
+  const ease = 'cubic-bezier(0.22, 1, 0.36, 1)'
   el.style.transition = [
-    `left ${DOCK_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
-    `top ${DOCK_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
-    `width ${DOCK_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+    `left ${DOCK_MS}ms ${ease}`,
+    `top ${DOCK_MS}ms ${ease}`,
+    `width ${DOCK_MS}ms ${ease}`,
   ].join(', ')
-  el.style.left = `${to.left}px`
-  el.style.top = `${to.top}px`
+
+  el.style.left = `${to.centerX}px`
+  el.style.top = `${to.centerY}px`
   el.style.width = `${to.width}px`
 
   if (nearTimer) clearTimeout(nearTimer)
   if (doneTimer) clearTimeout(doneTimer)
 
+  // Abrir velo mientras el dragón vuela (chrome ya está en su sitio)
   nearTimer = setTimeout(() => {
     emit('dock-near-end')
   }, DOCK_MS * REVEAL_AT)
@@ -188,18 +216,79 @@ const playDock = async () => {
   doneTimer = setTimeout(() => finishDock(), DOCK_MS + 40)
 }
 
+const goScrollTop = () => {
+  window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  document.documentElement.scrollTop = 0
+  document.body.scrollTop = 0
+}
+
+/**
+ * Entrega al DOM del dock con FLIP (sin blink) para que quede estacionado.
+ */
 const finishDock = async () => {
-  document.body.style.overflow = ''
+  const el = logoRef.value
+  if (!el) {
+    isReady.value = true
+    chromeSettled.value = true
+    emit('dock-done')
+    return
+  }
+
+  // Recalcular destino por si el velo/scrollbar movió el layout
+  const anchor = getDockAnchor()
+  if (anchor) {
+    const to = getDockTarget(anchor)
+    el.style.transition = `left 180ms ease, top 180ms ease, width 180ms ease`
+    el.style.left = `${to.centerX}px`
+    el.style.top = `${to.centerY}px`
+    el.style.width = `${to.width}px`
+    await wait(190)
+  }
+
+  const before = el.getBoundingClientRect()
+
   isReady.value = true
-  logoSettling.value = true
-  emit('dock-done')
+  emit('dock-done') // Teleport → #dragon-dock
 
   await nextTick()
   await nextTick()
+
   clearLogoInline()
+  await nextTick()
+
+  const afterEl = logoRef.value
+  if (!afterEl) return
+
+  const after = afterEl.getBoundingClientRect()
+  if (after.width < 2 || after.height < 2) return
+
+  const dx = before.left - after.left
+  const dy = before.top - after.top
+  const sx = before.width / after.width
+  const sy = before.height / after.height
+
+  const needsFlip =
+    Math.abs(dx) > 0.8 ||
+    Math.abs(dy) > 0.8 ||
+    Math.abs(sx - 1) > 0.015 ||
+    Math.abs(sy - 1) > 0.015
+
+  if (!needsFlip) return
+
+  logoSettling.value = true
+  afterEl.style.transition = 'none'
+  afterEl.style.transformOrigin = 'top left'
+  afterEl.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`
+  void afterEl.offsetWidth
+
+  afterEl.style.transition = `transform ${SETTLE_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`
+  afterEl.style.transform = 'translate(0, 0) scale(1, 1)'
+
+  await wait(SETTLE_MS + 30)
+  afterEl.style.transition = ''
+  afterEl.style.transform = ''
+  afterEl.style.transformOrigin = ''
   logoSettling.value = false
-  const el = logoRef.value
-  if (el) el.style.opacity = '1'
 }
 
 watch(
@@ -213,6 +302,7 @@ watch(
       clearLogoInline()
       logoSettling.value = false
       isReady.value = true
+      chromeSettled.value = true
     }
   },
 )
@@ -223,6 +313,7 @@ onMounted(async () => {
     await placeSplash()
   } else if (props.introPhase === 'done') {
     isReady.value = true
+    chromeSettled.value = true
   }
 });
 
@@ -234,7 +325,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-if="!isMobile" class="menuTop" :class="{ ready: isReady }">
+  <div v-if="!isMobile" class="menuTop" :class="{ ready: isReady, settled: chromeSettled }">
     <div class="letters">
       <div class="brand-letters">
         <img :src="`${imageStore.imagePath}/letras.webp`" alt="DRS">
@@ -244,7 +335,7 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <div class="header-lang" :class="{ ready: isReady }">
+    <div class="header-lang" :class="{ ready: isReady, settled: chromeSettled }">
       <LanguagesSelector />
     </div>
 
@@ -266,7 +357,7 @@ onUnmounted(() => {
     </Teleport>
   </div>
 
-  <div v-if="isMobile" class="mobile-wrap" :class="{ ready: isReady }">
+  <div v-if="isMobile" class="mobile-wrap" :class="{ ready: isReady, settled: chromeSettled }">
     <div class="menu">
       <div class="lettersMobile">
         <div class="brand-letters">
@@ -277,7 +368,7 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <div class="header-lang header-lang--mobile" :class="{ ready: isReady }">
+      <div class="header-lang header-lang--mobile" :class="{ ready: isReady, settled: chromeSettled }">
         <LanguagesSelector />
       </div>
 
@@ -565,20 +656,18 @@ onUnmounted(() => {
   transform-origin: center center;
   pointer-events: auto;
   opacity: 1;
+  will-change: left, top, width, transform;
 }
 
-.brand-logo.settling {
-  opacity: 0 !important;
-  transition: none !important;
-}
-
-/* Parqueado en el hueco de las cards: sin clip ni posición de header */
+/* Parqueado: ocupa el hueco ya reservado por el spacer (sin empujar layout) */
 .brand-logo.parked {
-  position: relative;
+  position: absolute;
+  inset: 0;
   right: auto;
   top: auto;
   left: auto;
   width: 100%;
+  height: 100%;
   margin: 0;
   transform: none;
   z-index: 2;
@@ -586,13 +675,17 @@ onUnmounted(() => {
 
 .brand-logo.parked img {
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: contain;
   border-radius: 0;
   clip-path: none;
   transform-origin: center center;
   animation: dragonHeartbeat 2.8s ease-in-out infinite;
   will-change: transform;
+}
+
+.brand-logo.settling img {
+  animation: none !important;
 }
 
 .brand-logo--mobile {
@@ -602,7 +695,9 @@ onUnmounted(() => {
 }
 
 .brand-logo.parked.brand-logo--mobile {
+  inset: 0;
   width: 100%;
+  height: 100%;
   top: auto;
   right: auto;
 }
@@ -642,22 +737,49 @@ onUnmounted(() => {
   animation: none;
 }
 
-/* Entrada + idle: letras */
-.menuTop.ready .letters .brand-letters,
-.mobile-wrap.ready .lettersMobile .brand-letters {
+/* Entrada + idle: letras (solo si NO vienen del intro ya cargado) */
+.menuTop.ready:not(.settled) .letters .brand-letters,
+.mobile-wrap.ready:not(.settled) .lettersMobile .brand-letters {
   animation:
     lettersEntrance 1.35s cubic-bezier(0.16, 1, 0.3, 1) both,
     lettersBreathe 4.8s 1.5s ease-in-out infinite;
 }
 
-.menuTop.ready .letters .brand-letters img,
-.mobile-wrap.ready .lettersMobile .brand-letters img {
+.menuTop.ready:not(.settled) .letters .brand-letters img,
+.mobile-wrap.ready:not(.settled) .lettersMobile .brand-letters img {
   opacity: 1;
 }
 
-.menuTop.ready .letters .brand-shine,
-.mobile-wrap.ready .lettersMobile .brand-shine {
+.menuTop.ready:not(.settled) .letters .brand-shine,
+.mobile-wrap.ready:not(.settled) .lettersMobile .brand-shine {
   animation: shineSweep 4.2s 1.8s ease-in-out infinite;
+}
+
+/* Intro: letras e idioma ya estacionados bajo el velo (sin entrada que reacomode) */
+.menuTop.ready.settled .letters .brand-letters,
+.mobile-wrap.ready.settled .lettersMobile .brand-letters {
+  opacity: 1;
+  transform: none;
+  filter:
+    drop-shadow(0 0.15rem 0.4rem rgba(0, 0, 0, 0.35));
+  animation: lettersBreathe 4.8s 1.2s ease-in-out infinite;
+}
+
+.menuTop.ready.settled .letters .brand-letters img,
+.mobile-wrap.ready.settled .lettersMobile .brand-letters img {
+  opacity: 1;
+}
+
+.menuTop.ready.settled .letters .brand-shine,
+.mobile-wrap.ready.settled .lettersMobile .brand-shine {
+  animation: shineSweep 4.2s 1.2s ease-in-out infinite;
+}
+
+.header-lang.ready.settled {
+  opacity: 1;
+  transform: none;
+  animation: none;
+  pointer-events: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {

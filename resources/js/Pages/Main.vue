@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Header from '../../components/HeaderView.vue'
 import Footer from '../../components/FooterView.vue'
 import Seccion1 from '../../components/seccion-1.vue'
+import Seccion4 from '../../components/seccion-4.vue'
 import Seccion5 from '../../components/seccion-5.vue'
 import Seccion6 from '../../components/seccion-6.vue'
 import PageIntro from '../../components/PageIntro.vue'
+import { useImageStore } from '../../store/imageStore'
 
 interface Review {
   id: number;
@@ -32,7 +34,49 @@ const props = defineProps<{
   cards: AppCard[]
 }>()
 
-/** Dragón: loading (centro) → docking (#dragon-dock) → done */
+const imageStore = useImageStore()
+imageStore.fetchImagePath()
+
+/** Assets que deben estar listos antes de salir del intro */
+const criticalAssets = computed(() => {
+  const base = imageStore.imagePath || '/images'
+  const list = [
+    `${base}/drs.webp`,
+    `${base}/letras.webp`,
+    `${base}/seccion-1/fondo.png`,
+    `${base}/seccion-1/video1.mp4`,
+    `${base}/seccion-1/1.png`,
+    `${base}/seccion-1/picture.webp`,
+    `${base}/iqathletic/icon.png`,
+    `${base}/seccion-4/1.jpg`,
+    `${base}/seccion-4/2.jpg`,
+    `${base}/seccion-4/3.jpg`,
+    `${base}/seccion-4/4.jpg`,
+    `${base}/seccion-5/figura1.svg`,
+    `${base}/seccion-5/figura2.svg`,
+    `${base}/seccion-5/figura3.svg`,
+    `${base}/seccion-5/figura4.svg`,
+    `${base}/seccion-6/fondo.webp`,
+    `${base}/seccion-6/instagram.svg`,
+    `${base}/seccion-6/email.svg`,
+    `${base}/seccion-6/1.svg`,
+    `${base}/seccion-6/2.svg`,
+    `${base}/seccion-6/3.svg`,
+    `${base}/seccion-6/4.svg`,
+    `${base}/seccion-6/5.svg`,
+    `${base}/seccion-6/6.svg`,
+    `${base}/seccion-6/7.svg`,
+  ]
+
+  props.cards.forEach((card) => {
+    if (card.imageUrl) list.push(card.imageUrl)
+    if (card.projectIconUrl) list.push(card.projectIconUrl)
+  })
+
+  return [...new Set(list)]
+})
+
+/** Dragón: loading (centro) → docking (vuelo al dock) → done */
 const introPhase = ref<'loading' | 'docking' | 'done'>('loading')
 const introActive = ref(true)
 const revealPage = ref(false)
@@ -50,11 +94,13 @@ const onIntroLoaded = () => {
   introPhase.value = 'docking'
 }
 
+/** Mitad del vuelo: abrir velo para ver el dragón acomodarse sobre la página */
 const onDockNearEnd = () => {
   revealPage.value = true
   goToFirstSection()
 }
 
+/** Fin del vuelo: teleporta al dock (Header hace FLIP) */
 const onDockDone = () => {
   introPhase.value = 'done'
   document.body.style.overflow = ''
@@ -82,6 +128,7 @@ onUnmounted(() => {
     <PageIntro
         v-if="introActive"
         :reveal="revealPage"
+        :critical-assets="criticalAssets"
         @loaded="onIntroLoaded"
         @veil-gone="onVeilGone"
     />
@@ -93,6 +140,7 @@ onUnmounted(() => {
             @dock-done="onDockDone"
         />
         <Seccion1 :cards="props.cards" />
+        <Seccion4 />
         <Seccion5 :reviews="props.reviews"></Seccion5>
         <Seccion6></Seccion6>
         <Footer></Footer>
