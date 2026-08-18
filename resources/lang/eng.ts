@@ -72,6 +72,85 @@ export default {
       'Visit the official site and see how technology can help you optimize your center and deliver a professional, differentiated service.',
     ctaButton: 'Go to official site',
   },
+  shop: {
+    brand: 'Ecommerce',
+    headline: 'Your online store, ready to sell',
+    whatTitle: 'What is it?',
+    whatBody:
+      'Your own ecommerce for your business: catalog, payments, and management—no technical setup. Pay the monthly fee, upload your products, and promote your page.',
+    priceLabel: '$250,000 ARS / month',
+    priceBody: 'Includes domain, hosting, maintenance, and 24/7 support.',
+    featuresLead: 'What your customer sees',
+    features: [
+      {
+        title: 'A page with your brand',
+        body: 'Logo, colors, banners, and contact details. Your identity, not a generic template.',
+      },
+      {
+        title: 'Catalog by category',
+        body: 'Photos, search, and clear organization so shoppers find products fast.',
+      },
+      {
+        title: 'Prices in pesos',
+        body: 'You set the dollar rate; customers only see prices in pesos.',
+      },
+      {
+        title: 'Visible deals',
+        body: 'Strikethrough price and promotional price in green, ready to convert.',
+      },
+      {
+        title: 'Cart and Mercado Pago',
+        body: 'Favorites, cart, and checkout with Mercado Pago. Money goes to your account.',
+      },
+      {
+        title: 'Buyer account',
+        body: 'Orders and purchase status always available for your customer.',
+      },
+    ],
+    rolesTitle: 'What you manage',
+    rolesLead:
+      'Full admin panel: products, dollar rate, Mercado Pago with your keys, real-time sales, logistics, invoices, and store identity.',
+    roleCustomer: 'Customer view',
+    roleAdmin: 'Admin panel',
+    adminFeatures: [
+      {
+        title: 'Products',
+        body: 'Create, edit, stock, pause/activate, images, and deals.',
+      },
+      {
+        title: 'Dollar rate',
+        body: 'Update all prices at once.',
+      },
+      {
+        title: 'Your Mercado Pago',
+        body: 'Your keys: money goes straight to your account.',
+      },
+      {
+        title: 'Sales and customers',
+        body: 'Real-time sales and detail for every order.',
+      },
+      {
+        title: 'Logistics',
+        body: 'Drivers, vehicles, and dispatch.',
+      },
+      {
+        title: 'Invoices and identity',
+        body: 'Receipts, colors, banners, data, and store settings.',
+      },
+    ],
+    plansTitle: 'Everything included, no technical setup',
+    plansLead: '1 install = 1 store = your domain. You sell. We keep the site running.',
+    planIncludeTitle: 'What’s included',
+    planIncludeBody:
+      'Domain, hosting, maintenance, and 24/7 support. Upload products, set the dollar rate, and charge with your Mercado Pago.',
+    planPriceTitle: 'Monthly plan',
+    planPriceBody:
+      '$250,000 ARS per month. Your catalog, your prices, your account. Ready to sell from day one.',
+    ctaTitle: 'Upload products and sell',
+    ctaBody:
+      'Ecommerce ready to use. Your catalog, your prices, your Mercado Pago. Customers pay in pesos; you get paid in your account.',
+    ctaButton: 'I want my store',
+  },
   reviews: {
     title: 'Reviews',
     subtitle: 'Join the satisfied people after completing your project with us! Your opinion matters to us!',
@@ -104,5 +183,10 @@ export default {
     esp: 'Español',
     pt: 'Português',
     eng: 'English',
+  },
+  apps: {
+    explore: 'Explore',
+    close: 'Close',
+    tap: 'Tap to see everything',
   },
 } as const

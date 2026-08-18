@@ -72,6 +72,85 @@ export default {
       'Entrá al sitio oficial y descubrí cómo la tecnología puede ayudarte a optimizar tu centro y brindar un servicio profesional y diferenciado.',
     ctaButton: 'Ir al sitio oficial',
   },
+  shop: {
+    brand: 'Ecommerce',
+    headline: 'Tu tienda online, lista para vender',
+    whatTitle: '¿Qué es?',
+    whatBody:
+      'Una ecommerce propia para tu comercio: catálogo, pagos y gestión, sin armar nada técnico. Pagás la mensualidad, subís tus productos y promocionás tu página.',
+    priceLabel: '$250.000 ARS / mes',
+    priceBody: 'Incluye dominio, hosting, mantenimiento y soporte 24/7.',
+    featuresLead: 'Lo que ve tu cliente',
+    features: [
+      {
+        title: 'Página con tu marca',
+        body: 'Logo, colores, banners y datos de contacto. Tu identidad, no una plantilla genérica.',
+      },
+      {
+        title: 'Catálogo por categorías',
+        body: 'Fotos, búsqueda y organización clara para que encuentren rápido lo que buscan.',
+      },
+      {
+        title: 'Precios en pesos',
+        body: 'El dólar lo configurás vos; el cliente solo ve precios en pesos.',
+      },
+      {
+        title: 'Ofertas visibles',
+        body: 'Precio tachado y precio promocional en verde, listo para convertir.',
+      },
+      {
+        title: 'Carrito y Mercado Pago',
+        body: 'Favoritos, carrito y compra con Mercado Pago. El dinero entra a tu cuenta.',
+      },
+      {
+        title: 'Cuenta del comprador',
+        body: 'Pedidos y estado de la compra siempre a mano para tu cliente.',
+      },
+    ],
+    rolesTitle: 'Lo que manejás vos',
+    rolesLead:
+      'Panel admin completo: productos, cotización del dólar, Mercado Pago con tus keys, ventas en tiempo real, logística, boletas e identidad de la tienda.',
+    roleCustomer: 'Vista del cliente',
+    roleAdmin: 'Panel admin',
+    adminFeatures: [
+      {
+        title: 'Productos',
+        body: 'Alta, edición, stock, pausar/activar, imágenes y ofertas.',
+      },
+      {
+        title: 'Cotización del dólar',
+        body: 'Actualizás todos los precios de una vez.',
+      },
+      {
+        title: 'Mercado Pago propio',
+        body: 'Tus keys: el dinero entra directo a tu cuenta.',
+      },
+      {
+        title: 'Ventas y clientes',
+        body: 'Ventas en tiempo real y detalle de cada pedido.',
+      },
+      {
+        title: 'Logística',
+        body: 'Choferes, vehículos y despacho.',
+      },
+      {
+        title: 'Boletas e identidad',
+        body: 'Comprobantes, colores, banners, datos y configuración de la tienda.',
+      },
+    ],
+    plansTitle: 'Todo incluido, sin armar nada técnico',
+    plansLead: '1 instalación = 1 tienda = tu dominio. Vos te ocupás de vender. Nosotros de que la página funcione.',
+    planIncludeTitle: 'Qué incluye',
+    planIncludeBody:
+      'Dominio, hosting, mantenimiento y soporte 24/7. Subís productos, configurás el dólar y cobrás con tu Mercado Pago.',
+    planPriceTitle: 'Plan mensual',
+    planPriceBody:
+      '$250.000 ARS por mes. Tu catálogo, tus precios, tu cuenta. Listo para vender desde el día uno.',
+    ctaTitle: 'Subí productos y vendé',
+    ctaBody:
+      'Ecommerce lista para usar. Tu catálogo, tus precios, tu Mercado Pago. El cliente paga en pesos; vos cobrás en tu cuenta.',
+    ctaButton: 'Quiero mi tienda',
+  },
   reviews: {
     title: 'Reviews',
     subtitle: 'Únete a las personas satisfechas luego de concretar tu proyecto con nosotros!, tu opinión si nos importa!',
@@ -104,5 +183,10 @@ export default {
     esp: 'Español',
     pt: 'Português',
     eng: 'English',
+  },
+  apps: {
+    explore: 'Explorar',
+    close: 'Cerrar',
+    tap: 'Tocá para ver todo',
   },
 } as const

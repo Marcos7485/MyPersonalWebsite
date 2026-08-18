@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useLanguageStore } from '../store/language.ts'
 import { useImageStore } from '../store/imageStore.ts'
+import { openSoftware, toggleSoftware } from '../store/softwaresExpand.ts'
 
 const imageStore = useImageStore()
 const languageStore = useLanguageStore()
@@ -11,6 +12,9 @@ onMounted(() => {
 })
 
 const visible = ref(false)
+const open = computed(() => openSoftware.value === 'iq')
+const detailsRef = ref<HTMLElement | null>(null)
+
 const onIntersect = () => {
     visible.value = true
 }
@@ -28,142 +32,165 @@ const featureIcons = [
 ] as const
 
 const siteUrl = 'https://www.iqathleticsoftware.com'
+
+const toggle = () => {
+    toggleSoftware('iq')
+}
+
+watch(open, async (isOpen) => {
+    if (isOpen) {
+        await nextTick()
+        detailsRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+})
 </script>
 
 <template>
-    <section id="Softwares" class="iq">
+    <section id="Softwares" class="iq" :class="{ 'is-open': open }">
         <div class="iq-trigger" v-intersect="onIntersect" aria-hidden="true"></div>
         <div class="iq-glow" aria-hidden="true"></div>
 
         <div class="iq-shell" :class="{ active: visible }">
-            <!-- 1. Presentación -->
-            <header class="iq-intro">
-                <div class="iq-intro-copy">
-                    <div class="iq-brand">
-                        <img
-                            class="iq-brand-icon"
-                            :src="`${imageStore.imagePath}/iqathletic/icon.png`"
-                            alt=""
-                            width="64"
-                            height="64"
-                        />
-                        <span class="iq-brand-name">{{ languageStore.t('iq.brand') }}</span>
-                    </div>
-
-                    <h1 class="iq-title">{{ languageStore.t('iq.headline') }}</h1>
-                    <p class="iq-lead">{{ languageStore.t('iq.whatBody') }}</p>
-                </div>
-
-                <div class="iq-intro-visual" aria-hidden="true">
+            <button
+                type="button"
+                class="iq-cover"
+                :aria-expanded="open"
+                aria-controls="iq-details"
+                @click="toggle"
+            >
+                <div class="iq-cover-media" aria-hidden="true">
                     <img
-                        :src="`${imageStore.imagePath}/seccion-4/1.jpg`"
+                        class="iq-cover-logo"
+                        :src="`${imageStore.imagePath}/iqathletic/icon.png`"
                         alt=""
                     />
-                </div>
-            </header>
-
-            <!-- 2. Capacidades -->
-            <div class="iq-section">
-                <div class="iq-section-head">
-                    <p class="iq-kicker">{{ languageStore.t('iq.whatTitle') }}</p>
-                    <h2>{{ languageStore.t('iq.featuresLead') }}</h2>
+                    <div class="iq-cover-shine"></div>
+                    <div class="iq-cover-vignette"></div>
                 </div>
 
-                <div class="iq-features-row">
-                    <ul class="iq-grid">
-                        <li
-                            v-for="(feature, index) in features"
-                            :key="feature.title"
-                            class="iq-item"
-                        >
-                            <span class="iq-item-index" aria-hidden="true">
-                                {{ String(index + 1).padStart(2, '0') }}
-                            </span>
-                            <div class="iq-item-body">
-                                <div class="iq-item-top">
-                                    <i
-                                        class="fa-solid iq-item-icon"
-                                        :class="featureIcons[index] || 'fa-circle-check'"
-                                        aria-hidden="true"
-                                    ></i>
-                                    <h3>{{ feature.title }}</h3>
-                                </div>
-                                <p>{{ feature.body }}</p>
+                <div class="iq-cover-content">
+                    <p class="iq-cover-brand">{{ languageStore.t('iq.brand') }}</p>
+                    <h2 class="iq-cover-title">{{ languageStore.t('iq.headline') }}</h2>
+                    <p class="iq-cover-hint">
+                        <span>{{ open ? languageStore.t('apps.close') : languageStore.t('apps.tap') }}</span>
+                        <i
+                            class="fa-solid"
+                            :class="open ? 'fa-chevron-up' : 'fa-arrow-right'"
+                            aria-hidden="true"
+                        ></i>
+                    </p>
+                </div>
+            </button>
+
+            <div
+                id="iq-details"
+                ref="detailsRef"
+                class="iq-collapse"
+                :class="{ open }"
+            >
+                <div class="iq-collapse-inner">
+                    <div class="iq-details">
+                        <header class="iq-intro">
+                            <div class="iq-intro-copy">
+                                <p class="iq-kicker">{{ languageStore.t('iq.whatTitle') }}</p>
+                                <p class="iq-lead">{{ languageStore.t('iq.whatBody') }}</p>
                             </div>
-                        </li>
-                    </ul>
+                            <div class="iq-intro-visual" aria-hidden="true">
+                                <img :src="`${imageStore.imagePath}/seccion-4/1.jpg`" alt="" />
+                            </div>
+                        </header>
 
-                    <figure class="iq-menu-shot">
-                        <img
-                            :src="`${imageStore.imagePath}/seccion-4/2.jpg`"
-                            alt=""
-                        />
-                    </figure>
-                </div>
-            </div>
+                        <div class="iq-section">
+                            <div class="iq-section-head">
+                                <h2>{{ languageStore.t('iq.featuresLead') }}</h2>
+                            </div>
 
-            <!-- 3. Perfiles multi-tenant -->
-            <div class="iq-section">
-                <div class="iq-section-head">
-                    <h2>{{ languageStore.t('iq.rolesTitle') }}</h2>
-                    <p class="iq-section-sub">{{ languageStore.t('iq.rolesLead') }}</p>
-                </div>
+                            <div class="iq-features-row">
+                                <ul class="iq-grid">
+                                    <li
+                                        v-for="(feature, index) in features"
+                                        :key="feature.title"
+                                        class="iq-item"
+                                    >
+                                        <span class="iq-item-index" aria-hidden="true">
+                                            {{ String(index + 1).padStart(2, '0') }}
+                                        </span>
+                                        <div class="iq-item-body">
+                                            <div class="iq-item-top">
+                                                <i
+                                                    class="fa-solid iq-item-icon"
+                                                    :class="featureIcons[index] || 'fa-circle-check'"
+                                                    aria-hidden="true"
+                                                ></i>
+                                                <h3>{{ feature.title }}</h3>
+                                            </div>
+                                            <p>{{ feature.body }}</p>
+                                        </div>
+                                    </li>
+                                </ul>
 
-                <div class="iq-roles">
-                    <figure class="iq-role">
-                        <div class="iq-role-frame">
-                            <img
-                                :src="`${imageStore.imagePath}/seccion-4/4.jpg`"
-                                alt=""
-                            />
+                                <figure class="iq-menu-shot">
+                                    <img :src="`${imageStore.imagePath}/seccion-4/2.jpg`" alt="" />
+                                </figure>
+                            </div>
                         </div>
-                        <figcaption>{{ languageStore.t('iq.roleStudent') }}</figcaption>
-                    </figure>
-                    <figure class="iq-role">
-                        <div class="iq-role-frame">
-                            <img
-                                :src="`${imageStore.imagePath}/seccion-4/3.jpg`"
-                                alt=""
-                            />
+
+                        <div class="iq-section">
+                            <div class="iq-section-head">
+                                <h2>{{ languageStore.t('iq.rolesTitle') }}</h2>
+                                <p class="iq-section-sub">{{ languageStore.t('iq.rolesLead') }}</p>
+                            </div>
+
+                            <div class="iq-roles">
+                                <figure class="iq-role">
+                                    <div class="iq-role-frame">
+                                        <img :src="`${imageStore.imagePath}/seccion-4/4.jpg`" alt="" />
+                                    </div>
+                                    <figcaption>{{ languageStore.t('iq.roleStudent') }}</figcaption>
+                                </figure>
+                                <figure class="iq-role">
+                                    <div class="iq-role-frame">
+                                        <img :src="`${imageStore.imagePath}/seccion-4/3.jpg`" alt="" />
+                                    </div>
+                                    <figcaption>{{ languageStore.t('iq.roleStaff') }}</figcaption>
+                                </figure>
+                            </div>
                         </div>
-                        <figcaption>{{ languageStore.t('iq.roleStaff') }}</figcaption>
-                    </figure>
-                </div>
-            </div>
 
-            <!-- 4. Planes -->
-            <div class="iq-section">
-                <div class="iq-section-head">
-                    <h2>{{ languageStore.t('iq.plansTitle') }}</h2>
-                    <p class="iq-section-sub">{{ languageStore.t('iq.plansLead') }}</p>
-                </div>
+                        <div class="iq-section">
+                            <div class="iq-section-head">
+                                <h2>{{ languageStore.t('iq.plansTitle') }}</h2>
+                                <p class="iq-section-sub">{{ languageStore.t('iq.plansLead') }}</p>
+                            </div>
 
-                <div class="iq-plans">
-                    <article class="iq-plan">
-                        <h3>{{ languageStore.t('iq.planProTitle') }}</h3>
-                        <p>{{ languageStore.t('iq.planProBody') }}</p>
-                    </article>
-                    <article class="iq-plan iq-plan--main">
-                        <h3>{{ languageStore.t('iq.planTotalTitle') }}</h3>
-                        <p>{{ languageStore.t('iq.planTotalBody') }}</p>
-                    </article>
-                </div>
-            </div>
+                            <div class="iq-plans">
+                                <article class="iq-plan">
+                                    <h3>{{ languageStore.t('iq.planProTitle') }}</h3>
+                                    <p>{{ languageStore.t('iq.planProBody') }}</p>
+                                </article>
+                                <article class="iq-plan iq-plan--main">
+                                    <h3>{{ languageStore.t('iq.planTotalTitle') }}</h3>
+                                    <p>{{ languageStore.t('iq.planTotalBody') }}</p>
+                                </article>
+                            </div>
+                        </div>
 
-            <!-- 4. CTA -->
-            <div class="iq-cta">
-                <div class="iq-cta-copy">
-                    <h2>{{ languageStore.t('iq.ctaTitle') }}</h2>
-                    <p>{{ languageStore.t('iq.ctaBody') }}</p>
+                        <div class="iq-cta">
+                            <div class="iq-cta-copy">
+                                <h2>{{ languageStore.t('iq.ctaTitle') }}</h2>
+                                <p>{{ languageStore.t('iq.ctaBody') }}</p>
+                            </div>
+                            <a
+                                class="iq-cta-btn"
+                                :href="siteUrl"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                {{ languageStore.t('iq.ctaButton') }}
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <a
-                    class="iq-cta-btn"
-                    :href="siteUrl"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    {{ languageStore.t('iq.ctaButton') }}
-                </a>
             </div>
         </div>
     </section>
@@ -207,13 +234,186 @@ const siteUrl = 'https://www.iqathleticsoftware.com'
     z-index: 1;
     width: min(112rem, calc(100% - 2 * var(--iq-pad)));
     margin: 0 auto;
-    padding: clamp(5rem, 8vw, 8rem) 0 clamp(5.5rem, 8vw, 8.5rem);
+    padding: clamp(4rem, 7vw, 7rem) 0 clamp(4rem, 7vw, 7rem);
     display: flex;
     flex-direction: column;
-    gap: clamp(4.5rem, 7vw, 7rem);
+    gap: 0;
 }
 
-/* —— Intro —— */
+/* —— Cover —— */
+.iq-cover {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 21 / 9;
+    min-height: 28rem;
+    padding: 0;
+    border: 1px solid var(--iq-line);
+    background: #000;
+    color: inherit;
+    cursor: pointer;
+    overflow: hidden;
+    text-align: left;
+    isolation: isolate;
+}
+
+.iq-cover-media {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: #000;
+}
+
+.iq-cover-logo {
+    width: min(58%, 40rem);
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 0 2.4rem rgba(170, 24, 24, 0.35));
+    transform: scale(1.02);
+    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), filter 0.5s ease;
+}
+
+.iq-cover:hover .iq-cover-logo,
+.iq-cover:focus-visible .iq-cover-logo {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 3.2rem rgba(170, 24, 24, 0.55));
+}
+
+.iq-cover-shine {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        115deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.16) 48%,
+        transparent 62%
+    );
+    transform: translateX(-120%);
+    transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.iq-cover:hover .iq-cover-shine,
+.iq-cover:focus-visible .iq-cover-shine {
+    transform: translateX(120%);
+}
+
+.iq-cover-vignette {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(90deg, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.15) 42%, rgba(0, 0, 0, 0.45) 100%),
+        linear-gradient(0deg, rgba(0, 0, 0, 0.78) 0%, transparent 48%);
+    transition: background 0.4s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.iq-cover:hover .iq-cover-vignette,
+.iq-cover:focus-visible .iq-cover-vignette {
+    background:
+        linear-gradient(90deg, rgba(0, 0, 0, 0.8) 0%, rgba(70, 8, 8, 0.28) 48%, rgba(0, 0, 0, 0.55) 100%),
+        linear-gradient(0deg, rgba(0, 0, 0, 0.82) 0%, transparent 52%);
+}
+
+.iq-cover-content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: clamp(2rem, 4vw, 3.6rem);
+}
+
+.iq-cover-brand {
+    margin: 0;
+    font-family: var(--familyTitles), Georgia, serif;
+    font-size: clamp(2.4rem, 3.4vw, 3.6rem);
+    line-height: 1;
+    color: var(--iq-red);
+}
+
+.iq-cover-title {
+    margin: 0;
+    max-width: 18ch;
+    font-family: var(--familyTitles), Georgia, serif;
+    font-size: clamp(2.2rem, 3.2vw, 3.4rem);
+    font-weight: 400;
+    line-height: 1.15;
+    color: #fff;
+    transform: translateY(0.4rem);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.iq-cover:hover .iq-cover-title,
+.iq-cover:focus-visible .iq-cover-title {
+    transform: translateY(0);
+}
+
+.iq-cover-hint {
+    margin: 0.4rem 0 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.9rem;
+    font-size: 1.45rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.iq-cover-hint i {
+    transition: transform 0.35s ease;
+}
+
+.iq-cover:hover .iq-cover-hint i,
+.iq-cover:focus-visible .iq-cover-hint i {
+    transform: translateX(0.5rem);
+}
+
+.iq.is-open .iq-cover-hint i {
+    transform: none;
+}
+
+.iq-cover:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+}
+
+/* —— Collapse —— */
+.iq-collapse {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.iq-collapse.open {
+    grid-template-rows: 1fr;
+}
+
+.iq-collapse-inner {
+    overflow: hidden;
+    min-height: 0;
+}
+
+.iq-details {
+    padding-top: clamp(3rem, 5vw, 4.5rem);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(4rem, 6vw, 6rem);
+    opacity: 0;
+    transform: translateY(1.2rem);
+    transition: opacity 0.4s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.iq-collapse.open .iq-details {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.12s;
+}
+
+/* —— Content (mismo lenguaje visual que antes) —— */
 .iq-intro {
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
@@ -227,35 +427,12 @@ const siteUrl = 'https://www.iqathleticsoftware.com'
     max-width: 58rem;
 }
 
-.iq-brand {
-    display: flex;
-    align-items: center;
-    gap: 1.2rem;
-    margin-bottom: 1.8rem;
-}
-
-.iq-brand-icon {
-    width: 5.6rem;
-    height: 5.6rem;
-    object-fit: contain;
-    flex-shrink: 0;
-}
-
-.iq-brand-name {
-    font-family: var(--familyTitles), Georgia, serif;
-    font-size: clamp(2.8rem, 4vw, 4.4rem);
-    line-height: 1;
+.iq-kicker {
+    margin: 0 0 0.8rem;
+    font-size: 1.35rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     color: var(--iq-red);
-}
-
-.iq-title {
-    margin: 0 0 1.6rem;
-    font-family: var(--familyTitles), Georgia, serif;
-    font-size: clamp(2.4rem, 3.4vw, 3.6rem);
-    font-weight: 400;
-    line-height: 1.2;
-    color: #fff;
-    max-width: 22ch;
 }
 
 .iq-lead {
@@ -282,7 +459,6 @@ const siteUrl = 'https://www.iqathleticsoftware.com'
     object-position: center top;
 }
 
-/* —— Bloques —— */
 .iq-section {
     display: flex;
     flex-direction: column;
@@ -291,14 +467,6 @@ const siteUrl = 'https://www.iqathleticsoftware.com'
 
 .iq-section-head {
     max-width: 64rem;
-}
-
-.iq-kicker {
-    margin: 0 0 0.8rem;
-    font-size: 1.35rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--iq-red);
 }
 
 .iq-section-head h2 {
@@ -318,7 +486,6 @@ const siteUrl = 'https://www.iqathleticsoftware.com'
     color: var(--iq-muted);
 }
 
-/* —— Features + captura del menú —— */
 .iq-features-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(22rem, 28rem);
@@ -402,7 +569,6 @@ const siteUrl = 'https://www.iqathleticsoftware.com'
     object-position: center top;
 }
 
-/* —— Perfiles alumno / personal —— */
 .iq-roles {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -442,7 +608,6 @@ const siteUrl = 'https://www.iqathleticsoftware.com'
     color: #fff;
 }
 
-/* —— Planes —— */
 .iq-plans {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -481,7 +646,6 @@ const siteUrl = 'https://www.iqathleticsoftware.com'
     color: var(--iq-muted);
 }
 
-/* —— CTA —— */
 .iq-cta {
     display: flex;
     align-items: center;
@@ -536,23 +700,8 @@ const siteUrl = 'https://www.iqathleticsoftware.com'
     outline-offset: 3px;
 }
 
-/* Animación suave (contenido siempre visible) */
-.iq-shell.active .iq-intro,
-.iq-shell.active .iq-section,
-.iq-shell.active .iq-cta {
+.iq-shell.active .iq-cover {
     animation: iqIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.iq-shell.active .iq-section:nth-of-type(1) {
-    animation-delay: 0.08s;
-}
-
-.iq-shell.active .iq-section:nth-of-type(2) {
-    animation-delay: 0.16s;
-}
-
-.iq-shell.active .iq-cta {
-    animation-delay: 0.24s;
 }
 
 @keyframes iqIn {
@@ -579,6 +728,15 @@ const siteUrl = 'https://www.iqathleticsoftware.com'
 }
 
 @media (max-width: 980px) {
+    .iq-cover {
+        aspect-ratio: 4 / 5;
+        min-height: 34rem;
+    }
+
+    .iq-cover-logo {
+        width: min(78%, 28rem);
+    }
+
     .iq-intro {
         grid-template-columns: 1fr;
     }
@@ -586,7 +744,6 @@ const siteUrl = 'https://www.iqathleticsoftware.com'
     .iq-intro-visual {
         justify-self: center;
         width: min(100%, 26rem);
-        aspect-ratio: 9 / 19;
         order: -1;
     }
 
@@ -620,6 +777,15 @@ const siteUrl = 'https://www.iqathleticsoftware.com'
 
     .iq-cta {
         padding: 2.2rem 1.8rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .iq-cover-logo,
+    .iq-cover-shine,
+    .iq-collapse,
+    .iq-details {
+        transition: none;
     }
 }
 </style>

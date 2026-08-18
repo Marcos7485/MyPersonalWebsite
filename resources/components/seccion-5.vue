@@ -441,33 +441,45 @@ const hasReviews = computed(() => reviewCount.value > 0)
 
 @media (max-width: 900px) {
     .reviews-inner {
-        min-height: 54rem;
-        padding: 5rem 2rem 6rem;
+        min-height: 0;
+        padding: 4rem 2rem 4.5rem;
+    }
+
+    .reviews-line--top {
+        top: 2.8rem;
+    }
+
+    .reviews-line--bottom {
+        bottom: 2.8rem;
     }
 
     .fig-1 {
-        width: 16rem;
-        top: 7rem;
+        width: 12rem;
+        top: 5rem;
         left: 0.5rem;
         opacity: 0;
     }
 
     .fig-2 {
-        width: 7rem;
-        left: 4rem;
-        bottom: 6rem;
+        width: 5.5rem;
+        left: 3rem;
+        bottom: 3.5rem;
     }
 
     .fig-3 {
-        width: 14rem;
-        right: 2rem;
-        bottom: 5.5rem;
+        width: 11rem;
+        right: 1.5rem;
+        bottom: 3rem;
     }
 
     .fig-4 {
-        width: 18rem;
-        right: 1rem;
-        bottom: 5.5rem;
+        width: 14rem;
+        right: 0.5rem;
+        bottom: 3rem;
+    }
+
+    .reviews-head {
+        margin-bottom: 2rem;
     }
 
     .reviews-stage {
@@ -479,49 +491,61 @@ const hasReviews = computed(() => reviewCount.value > 0)
     .reviews-slider {
         width: 100%;
     }
+
+    .review-item {
+        min-height: 0;
+        padding: 1.6rem 1rem 0.5rem;
+    }
 }
 
 @media (max-width: 600px) {
     .reviews-inner {
-        min-height: 58rem;
-        padding: 5rem 1.2rem 5.5rem;
+        min-height: 0;
+        padding: 3.2rem 1.2rem 3.6rem;
     }
 
     .reviews-line--top {
-        top: 3.5rem;
+        top: 2.2rem;
     }
 
     .reviews-line--bottom {
-        bottom: 3.5rem;
+        bottom: 2.2rem;
     }
 
     .fig-1 {
-        width: 12rem;
-        top: 6rem;
-        left: -1rem;
-        opacity: 0.9;
+        width: 9rem;
+        top: 4.2rem;
+        left: -1.2rem;
+        opacity: 0.55;
     }
 
     .fig-2 {
-        width: 5.5rem;
-        left: 1rem;
-        bottom: 5rem;
+        width: 4rem;
+        left: 0.6rem;
+        bottom: 2.4rem;
+        opacity: 0.5;
     }
 
     .fig-3 {
-        width: 11rem;
-        right: -0.5rem;
-        bottom: 4.5rem;
+        width: 8rem;
+        right: -1rem;
+        bottom: 2.2rem;
+        opacity: 0.5;
     }
 
     .fig-4 {
-        width: 14rem;
-        right: -1rem;
-        bottom: 4.5rem;
+        width: 10rem;
+        right: -1.4rem;
+        bottom: 2.2rem;
+        opacity: 0.45;
     }
 
     .reviews-head {
-        margin-bottom: 2rem;
+        margin-bottom: 1.4rem;
+    }
+
+    .reviews-sub {
+        margin-top: 0.8rem;
     }
 
     .reviews-stage {
@@ -534,12 +558,24 @@ const hasReviews = computed(() => reviewCount.value > 0)
     }
 
     .review-item {
-        padding: 1.5rem 0.4rem;
-        min-height: 20rem;
+        padding: 1rem 0.3rem 0.2rem;
+        min-height: 0;
+    }
+
+    .review-stars {
+        margin-bottom: 1rem;
     }
 
     .review-stars i {
         font-size: 1.5rem;
+    }
+
+    .review-name {
+        margin-bottom: 0.7rem;
+    }
+
+    .reviews-empty {
+        padding: 2rem 0;
     }
 }
 </style>

@@ -4,6 +4,7 @@ import Header from '../../components/HeaderView.vue'
 import Footer from '../../components/FooterView.vue'
 import Seccion1 from '../../components/seccion-1.vue'
 import Seccion4 from '../../components/seccion-4.vue'
+import Seccion41 from '../../components/seccion-4-1.vue'
 import Seccion5 from '../../components/seccion-5.vue'
 import Seccion6 from '../../components/seccion-6.vue'
 import PageIntro from '../../components/PageIntro.vue'
@@ -52,6 +53,8 @@ const criticalAssets = computed(() => {
     `${base}/seccion-4/2.jpg`,
     `${base}/seccion-4/3.jpg`,
     `${base}/seccion-4/4.jpg`,
+    `${base}/cliente/video-cel.mp4`,
+    `${base}/cliente/video.mp4`,
     `${base}/seccion-5/figura1.svg`,
     `${base}/seccion-5/figura2.svg`,
     `${base}/seccion-5/figura3.svg`,
@@ -141,6 +144,7 @@ onUnmounted(() => {
         />
         <Seccion1 :cards="props.cards" />
         <Seccion4 />
+        <Seccion41 />
         <Seccion5 :reviews="props.reviews"></Seccion5>
         <Seccion6></Seccion6>
         <Footer></Footer>
