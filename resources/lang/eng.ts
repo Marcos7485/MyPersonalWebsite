@@ -143,9 +143,9 @@ export default {
     planIncludeTitle: 'What’s included',
     planIncludeBody:
       'Domain, hosting, maintenance, and 24/7 support. Upload products, set the dollar rate, and charge with your Mercado Pago.',
-    planPriceTitle: 'Monthly plan',
+    planPriceTitle: 'Ready to sell',
     planPriceBody:
-      '$250,000 ARS per month. Your catalog, your prices, your account. Ready to sell from day one.',
+      'Your catalog, your prices, your account. No technical setup: upload products and start selling.',
     ctaTitle: 'Upload products and sell',
     ctaBody:
       'Ecommerce ready to use. Your catalog, your prices, your Mercado Pago. Customers pay in pesos; you get paid in your account.',

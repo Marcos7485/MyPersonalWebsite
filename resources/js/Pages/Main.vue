@@ -55,6 +55,7 @@ const criticalAssets = computed(() => {
     `${base}/seccion-4/4.jpg`,
     `${base}/cliente/video-cel.mp4`,
     `${base}/cliente/video.mp4`,
+    `${base}/seccion-41/banner.mp4`,
     `${base}/seccion-5/figura1.svg`,
     `${base}/seccion-5/figura2.svg`,
     `${base}/seccion-5/figura3.svg`,

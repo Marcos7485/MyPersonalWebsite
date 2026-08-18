@@ -143,9 +143,9 @@ export default {
     planIncludeTitle: 'O que inclui',
     planIncludeBody:
       'Domínio, hosting, manutenção e suporte 24/7. Suba produtos, configure o dólar e cobre com o seu Mercado Pago.',
-    planPriceTitle: 'Plano mensal',
+    planPriceTitle: 'Pronto para vender',
     planPriceBody:
-      '$250.000 ARS por mês. Seu catálogo, seus preços, sua conta. Pronto para vender desde o primeiro dia.',
+      'Seu catálogo, seus preços, sua conta. Sem montar nada técnico: suba produtos e comece a vender.',
     ctaTitle: 'Suba produtos e venda',
     ctaBody:
       'Ecommerce pronto para usar. Seu catálogo, seus preços, seu Mercado Pago. O cliente paga em pesos; você recebe na sua conta.',

@@ -68,23 +68,13 @@ watch(open, async (isOpen) => {
             >
                 <div class="shop-cover-media" aria-hidden="true">
                     <video
-                        class="shop-cover-video shop-cover-video--desk"
-                        :src="`${imageStore.imagePath}/cliente/video.mp4`"
+                        class="shop-cover-video"
+                        :src="`${imageStore.imagePath}/seccion-41/banner.mp4`"
                         autoplay
                         muted
                         loop
                         playsinline
                     ></video>
-                    <video
-                        class="shop-cover-video shop-cover-video--phone"
-                        :src="`${imageStore.imagePath}/cliente/video-cel.mp4`"
-                        autoplay
-                        muted
-                        loop
-                        playsinline
-                    ></video>
-                    <div class="shop-cover-grid"></div>
-                    <div class="shop-cover-glow"></div>
                     <div class="shop-cover-vignette"></div>
                 </div>
 
@@ -99,7 +89,6 @@ watch(open, async (isOpen) => {
                         <span>{{ languageStore.t('shop.brand') }}</span>
                     </div>
                     <h2 class="shop-cover-title">{{ languageStore.t('shop.headline') }}</h2>
-                    <p class="shop-cover-price">{{ languageStore.t('shop.priceLabel') }}</p>
                     <p class="shop-cover-hint">
                         <span>{{ open ? languageStore.t('apps.close') : languageStore.t('apps.tap') }}</span>
                         <i
@@ -129,11 +118,6 @@ watch(open, async (isOpen) => {
                                     <h1>{{ languageStore.t('shop.headline') }}</h1>
                                     <p>{{ languageStore.t('shop.whatBody') }}</p>
                                 </div>
-
-                                <aside class="shop-price-pill">
-                                    <span class="shop-price-amount">{{ languageStore.t('shop.priceLabel') }}</span>
-                                    <span class="shop-price-note">{{ languageStore.t('shop.priceBody') }}</span>
-                                </aside>
                             </div>
                         </header>
 
@@ -316,80 +300,33 @@ watch(open, async (isOpen) => {
 .shop-cover-media {
     position: absolute;
     inset: 0;
+    overflow: hidden;
 }
 
 .shop-cover-video {
     position: absolute;
-    object-fit: cover;
-    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), filter 0.5s ease;
-}
-
-.shop-cover-video--desk {
-    inset: 0;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    filter: saturate(0.9) brightness(0.72);
+    object-fit: cover;
+    object-position: center center;
+    display: block;
+    transform: scale(1.02);
+    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.shop-cover-video--phone {
-    right: 8%;
-    bottom: -4%;
-    width: min(22%, 18rem);
-    aspect-ratio: 9 / 16;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.55);
-    transform: translateY(1.2rem) rotate(3deg);
-    z-index: 1;
-}
-
-.shop-cover:hover .shop-cover-video--desk,
-.shop-cover:focus-visible .shop-cover-video--desk {
+.shop-cover:hover .shop-cover-video,
+.shop-cover:focus-visible .shop-cover-video {
     transform: scale(1.08);
-    filter: saturate(1.05) brightness(0.85);
-}
-
-.shop-cover:hover .shop-cover-video--phone,
-.shop-cover:focus-visible .shop-cover-video--phone {
-    transform: translateY(0) rotate(-2deg) scale(1.04);
-}
-
-.shop-cover-grid {
-    position: absolute;
-    inset: 0;
-    opacity: 0.25;
-    background-image:
-        linear-gradient(rgba(201, 166, 107, 0.18) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(201, 166, 107, 0.18) 1px, transparent 1px);
-    background-size: 3.2rem 3.2rem;
-    pointer-events: none;
-    transition: opacity 0.4s ease;
-}
-
-.shop-cover:hover .shop-cover-grid,
-.shop-cover:focus-visible .shop-cover-grid {
-    opacity: 0.45;
-}
-
-.shop-cover-glow {
-    position: absolute;
-    inset: -20%;
-    background: radial-gradient(circle at 70% 40%, rgba(201, 166, 107, 0.28), transparent 42%);
-    opacity: 0;
-    transition: opacity 0.45s ease;
-    pointer-events: none;
-}
-
-.shop-cover:hover .shop-cover-glow,
-.shop-cover:focus-visible .shop-cover-glow {
-    opacity: 1;
 }
 
 .shop-cover-vignette {
     position: absolute;
     inset: 0;
     background:
-        linear-gradient(90deg, rgba(18, 20, 24, 0.88) 0%, rgba(18, 20, 24, 0.35) 55%, rgba(18, 20, 24, 0.55) 100%),
-        linear-gradient(0deg, rgba(18, 20, 24, 0.8) 0%, transparent 48%);
+        linear-gradient(90deg, rgba(18, 20, 24, 0.55) 0%, rgba(18, 20, 24, 0.12) 50%, rgba(18, 20, 24, 0.3) 100%),
+        linear-gradient(0deg, rgba(18, 20, 24, 0.55) 0%, transparent 45%);
     pointer-events: none;
 }
 
@@ -443,12 +380,6 @@ watch(open, async (isOpen) => {
 .shop-cover:hover .shop-cover-title,
 .shop-cover:focus-visible .shop-cover-title {
     transform: translateY(0);
-}
-
-.shop-cover-price {
-    margin: 0;
-    font-size: clamp(1.5rem, 1.7vw, 1.85rem);
-    color: rgba(201, 166, 107, 0.95);
 }
 
 .shop-cover-hint {
@@ -533,10 +464,8 @@ watch(open, async (isOpen) => {
 }
 
 .shop-intro-main {
-    display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(18rem, 0.7fr);
-    gap: clamp(2rem, 4vw, 4rem);
-    align-items: end;
+    display: block;
+    max-width: 58rem;
 }
 
 .shop-intro-copy h1 {
@@ -554,30 +483,6 @@ watch(open, async (isOpen) => {
     max-width: 48rem;
     font-size: clamp(1.5rem, 1.55vw, 1.75rem);
     line-height: 1.65;
-    color: var(--shop-muted);
-}
-
-.shop-price-pill {
-    display: flex;
-    flex-direction: column;
-    gap: 0.7rem;
-    padding: 2rem 2.2rem;
-    border: 1px solid rgba(201, 166, 107, 0.45);
-    background:
-        linear-gradient(145deg, rgba(201, 166, 107, 0.14), transparent 55%),
-        rgba(0, 0, 0, 0.25);
-}
-
-.shop-price-amount {
-    font-family: var(--familyTitles), Georgia, serif;
-    font-size: clamp(1.9rem, 2.2vw, 2.4rem);
-    line-height: 1.2;
-    color: var(--shop-gold);
-}
-
-.shop-price-note {
-    font-size: 1.4rem;
-    line-height: 1.5;
     color: var(--shop-muted);
 }
 
@@ -881,18 +786,9 @@ watch(open, async (isOpen) => {
         aspect-ratio: 4 / 5;
         min-height: 34rem;
     }
-
-    .shop-cover-video--phone {
-        width: min(34%, 14rem);
-        right: 6%;
-    }
 }
 
 @media (max-width: 860px) {
-    .shop-intro-main {
-        grid-template-columns: 1fr;
-    }
-
     .shop-offer-split {
         grid-template-columns: 1fr;
     }
@@ -914,10 +810,6 @@ watch(open, async (isOpen) => {
 
     .shop-offer-cta a {
         width: 100%;
-    }
-
-    .shop-cover-video--phone {
-        display: none;
     }
 }
 
