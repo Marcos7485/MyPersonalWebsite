@@ -15,6 +15,22 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             HandleInertiaRequests::class,
         ]);
+
+        $middleware->redirectGuestsTo(function ($request) {
+            if ($request->is('iqathletic') || $request->is('iqathletic/*')) {
+                return route('iqathletic.login');
+            }
+
+            return '/';
+        });
+
+        $middleware->redirectUsersTo(function ($request) {
+            if ($request->is('iqathletic') || $request->is('iqathletic/*')) {
+                return route('iqathletic.dashboard');
+            }
+
+            return '/';
+        });
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

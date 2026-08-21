@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'iqathletic' => [
+        'url' => rtrim((string) env('IQ_APP_URL', ''), '/'),
+        's3_url' => rtrim((string) env('IQ_S3_URL', 'https://iqathletic.s3.sa-east-1.amazonaws.com'), '/'),
+    ],
+
 ];

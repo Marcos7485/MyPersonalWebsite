@@ -35,8 +35,18 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $iqAdmin = $request->user('iqadmin');
+
         return array_merge(parent::share($request), [
-            //
+            'iqAdmin' => $iqAdmin ? [
+                'id' => $iqAdmin->id,
+                'nombre' => $iqAdmin->nombre,
+                'email' => $iqAdmin->email,
+            ] : null,
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
         ]);
     }
 }

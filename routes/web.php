@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\IqAdminAuthController;
+use App\Http\Controllers\IqAdminDashboardController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ReviewsController;
@@ -19,8 +21,16 @@ Route::get('/cliente/welcome', [ProjectController::class, 'welcome']);
 Route::post('/cliente/load', [ProjectController::class, 'load']);
 Route::get('/cliente/panel/{project}', [ProjectController::class, 'panel'])->name('cliente.panel');
 
-
-
-
-// Route::get('/email', [ContactController::class, 'email']);
-
+// iQ Athletic admin
+Route::prefix('iqathletic')->name('iqathletic.')->group(function () {
+    Route::get('/login', [IqAdminAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [IqAdminAuthController::class, 'login'])
+        ->middleware('throttle:8,1')
+        ->name('login.submit');
+    Route::post('/logout', [IqAdminAuthController::class, 'logout'])
+        ->middleware('auth:iqadmin')
+        ->name('logout');
+    Route::get('/dashboard', [IqAdminDashboardController::class, 'show'])
+        ->middleware('auth:iqadmin')
+        ->name('dashboard');
+});

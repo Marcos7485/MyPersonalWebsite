@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
 import { useImageStore } from '../store/imageStore';
+import { useLanguageStore } from '../store/language';
 import LanguagesSelector from './LanguagesSelector.vue';
 
 const props = withDefaults(defineProps<{
@@ -15,8 +17,31 @@ const emit = defineEmits<{
   'dock-done': []
 }>()
 
+const page = usePage()
 const imageStore = useImageStore();
+const languageStore = useLanguageStore();
 imageStore.fetchImagePath();
+
+const iqAdmin = computed(() => {
+  const data = page.props.iqAdmin as { id: number; nombre: string | null; email: string | null } | null
+  return data
+})
+
+const adminHref = computed(() =>
+  iqAdmin.value ? '/iqathletic/dashboard' : '/iqathletic/login',
+)
+
+const adminTitle = computed(() => {
+  if (iqAdmin.value?.nombre) return iqAdmin.value.nombre
+  if (iqAdmin.value?.email) return iqAdmin.value.email
+  return languageStore.t('iqAdmin.adminLogin')
+})
+
+const adminHint = computed(() =>
+  iqAdmin.value
+    ? languageStore.t('iqAdmin.adminLoginHintLogged')
+    : languageStore.t('iqAdmin.adminLoginHint'),
+)
 
 const isMobile = ref(window.innerWidth <= 600);
 const isReady = ref(false);
@@ -335,6 +360,27 @@ onUnmounted(() => {
       </div>
     </div>
 
+    <div class="header-admin" :class="{ ready: isReady, settled: chromeSettled, logged: !!iqAdmin }">
+      <Link :href="adminHref" class="admin-login" :class="{ 'is-logged': !!iqAdmin }">
+        <span class="admin-login-aura" aria-hidden="true"></span>
+        <span class="admin-login-ring" aria-hidden="true"></span>
+        <span class="admin-login-shine" aria-hidden="true"></span>
+        <span class="admin-login-ico" aria-hidden="true">
+          <img
+            :src="`${imageStore.imagePath || '/images'}/drs.webp`"
+            alt=""
+            width="40"
+            height="40"
+          />
+        </span>
+        <span class="admin-login-copy">
+          <strong>{{ adminTitle }}</strong>
+          <small>{{ adminHint }}</small>
+        </span>
+        <span class="admin-login-arrow" aria-hidden="true">→</span>
+      </Link>
+    </div>
+
     <div class="header-lang" :class="{ ready: isReady, settled: chromeSettled }">
       <LanguagesSelector />
     </div>
@@ -366,6 +412,27 @@ onUnmounted(() => {
             <span class="brand-shine"></span>
           </span>
         </div>
+      </div>
+
+      <div class="header-admin header-admin--mobile" :class="{ ready: isReady, settled: chromeSettled, logged: !!iqAdmin }">
+        <Link :href="adminHref" class="admin-login admin-login--mobile" :class="{ 'is-logged': !!iqAdmin }">
+          <span class="admin-login-aura" aria-hidden="true"></span>
+          <span class="admin-login-ring" aria-hidden="true"></span>
+          <span class="admin-login-shine" aria-hidden="true"></span>
+          <span class="admin-login-ico" aria-hidden="true">
+            <img
+              :src="`${imageStore.imagePath || '/images'}/drs.webp`"
+              alt=""
+              width="36"
+              height="36"
+            />
+          </span>
+          <span class="admin-login-copy">
+            <strong>{{ adminTitle }}</strong>
+            <small>{{ adminHint }}</small>
+          </span>
+          <span class="admin-login-arrow" aria-hidden="true">→</span>
+        </Link>
       </div>
 
       <div class="header-lang header-lang--mobile" :class="{ ready: isReady, settled: chromeSettled }">
@@ -629,6 +696,294 @@ onUnmounted(() => {
   right: 1.6rem;
 }
 
+/* Admin login: fijo arriba, siempre visible al scrollear */
+.header-admin {
+  position: fixed;
+  top: 1.15rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(-0.4rem);
+  z-index: 5000;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.header-admin.ready {
+  pointer-events: auto;
+  animation: adminNavIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 0.45s;
+}
+
+.header-admin--mobile {
+  top: max(1rem, env(safe-area-inset-top, 0px));
+}
+
+.admin-login {
+  --admin-red: #c41818;
+  --admin-red-deep: #6b0a0a;
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 4.6rem;
+  padding: 0.55rem 1.5rem 0.55rem 0.7rem;
+  border: 1px solid rgba(255, 140, 140, 0.45);
+  border-radius: 1.2rem 2.8rem 1.2rem 2.8rem;
+  background:
+    linear-gradient(135deg, rgba(196, 24, 24, 0.95) 0%, rgba(120, 12, 12, 0.98) 48%, rgba(40, 6, 6, 0.98) 100%);
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow:
+    0 0 0 0 rgba(196, 24, 24, 0.55),
+    0 0.8rem 2.2rem rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  animation: adminPulse 2.6s ease-in-out infinite;
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    filter 0.25s ease;
+}
+
+.admin-login::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    transparent 42%,
+    rgba(0, 0, 0, 0.18) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.admin-login--mobile {
+  min-height: 4rem;
+  gap: 0.75rem;
+  padding: 0.4rem 1.15rem 0.4rem 0.55rem;
+}
+
+.admin-login:hover {
+  transform: translateY(-0.25rem) scale(1.035);
+  border-color: rgba(255, 190, 190, 0.85);
+  filter: saturate(1.08);
+  animation-play-state: paused;
+  box-shadow:
+    0 0 0 0.35rem rgba(196, 24, 24, 0.22),
+    0 1.2rem 2.8rem rgba(0, 0, 0, 0.5),
+    0 0 2.4rem rgba(196, 24, 24, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.admin-login:hover .admin-login-arrow {
+  transform: translateX(0.35rem);
+}
+
+.admin-login:hover .admin-login-ico {
+  transform: scale(1.08) rotate(-6deg);
+  box-shadow: 0 0 1.4rem rgba(255, 120, 120, 0.55);
+}
+
+.admin-login-aura {
+  position: absolute;
+  inset: -0.55rem;
+  border-radius: inherit;
+  background: radial-gradient(circle at 30% 40%, rgba(255, 80, 80, 0.35), transparent 65%);
+  filter: blur(0.9rem);
+  opacity: 0.75;
+  z-index: -1;
+  animation: adminAura 2.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.admin-login-ring {
+  position: absolute;
+  inset: -0.35rem;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 120, 120, 0.35);
+  opacity: 0;
+  z-index: -1;
+  pointer-events: none;
+  animation: adminRing 2.6s ease-out infinite;
+}
+
+.admin-login-shine {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.admin-login-shine::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: -40%;
+  width: 45%;
+  height: 140%;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 35%,
+    rgba(255, 255, 255, 0.45) 50%,
+    rgba(255, 255, 255, 0.08) 65%,
+    transparent 100%
+  );
+  transform: skewX(-18deg) translateX(-160%);
+  animation: adminShine 3.2s ease-in-out infinite;
+}
+
+.admin-login-ico {
+  position: relative;
+  z-index: 2;
+  width: 3.6rem;
+  height: 3.6rem;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 1rem 1.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.18), transparent 55%),
+    rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  box-shadow: inset 0 0 0.8rem rgba(255, 255, 255, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.admin-login-ico img {
+  width: 78%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 0 0.35rem rgba(255, 80, 80, 0.35));
+}
+
+.admin-login--mobile .admin-login-ico {
+  width: 3.2rem;
+  height: 3.2rem;
+}
+
+.admin-login-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  line-height: 1.05;
+}
+
+.admin-login-copy strong {
+  font-family: var(--familyTitles), Georgia, serif;
+  font-size: 1.55rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  max-width: 22rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-login-copy small {
+  max-width: 22rem;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  white-space: normal;
+  line-height: 1.15;
+  color: rgba(255, 210, 210, 0.88);
+}
+
+.admin-login--mobile .admin-login-copy strong {
+  font-size: 1.35rem;
+}
+
+.admin-login--mobile .admin-login-copy small {
+  font-size: 0.95rem;
+}
+
+.admin-login-arrow {
+  position: relative;
+  z-index: 2;
+  margin-left: 0.2rem;
+  font-size: 1.5rem;
+  opacity: 0.85;
+  transition: transform 0.25s ease;
+}
+
+@keyframes adminNavIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-0.4rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes adminPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(196, 24, 24, 0.55),
+      0 0.8rem 2.2rem rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  }
+  50% {
+    box-shadow:
+      0 0 0 0.7rem rgba(196, 24, 24, 0),
+      0 0.9rem 2.4rem rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  }
+}
+
+@keyframes adminAura {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes adminRing {
+  0% {
+    opacity: 0.65;
+    transform: scale(0.96);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(1.14);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.14);
+  }
+}
+
+@keyframes adminShine {
+  0%,
+  35% {
+    transform: skewX(-18deg) translateX(-160%);
+  }
+  70%,
+  100% {
+    transform: skewX(-18deg) translateX(280%);
+  }
+}
+
 /* Ancla: reserva el espacio del logo en el header */
 .logo-anchor {
   position: absolute;
@@ -782,12 +1137,24 @@ onUnmounted(() => {
   pointer-events: auto;
 }
 
+.header-admin.ready.settled {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  animation: none;
+  pointer-events: auto;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .menuTop.ready .letters .brand-letters,
   .menuTop.ready .letters .brand-shine,
   .mobile-wrap.ready .lettersMobile .brand-letters,
   .mobile-wrap.ready .lettersMobile .brand-shine,
   .header-lang.ready,
+  .header-admin.ready,
+  .admin-login,
+  .admin-login-shine::before,
+  .admin-login-aura,
+  .admin-login-ring,
   .brand-logo.splash img,
   .brand-logo.parked img {
     animation: none !important;

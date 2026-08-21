@@ -40,6 +40,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'iqadmin' => [
+            'driver' => 'session',
+            'provider' => 'iq_users',
+        ],
     ],
 
     /*
@@ -65,10 +70,10 @@ return [
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'iq_users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Iqathletic\IqUser::class,
+        ],
     ],
 
     /*
