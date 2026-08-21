@@ -170,23 +170,13 @@ watch(open, async (isOpen) => {
                             <div class="shop-admin-visuals">
                                 <figure>
                                     <video
-                                        :src="`${imageStore.imagePath}/cliente/video.mp4`"
+                                        :src="`${imageStore.imagePath}/seccion-41/video1.mp4`"
                                         autoplay
                                         muted
                                         loop
                                         playsinline
                                     ></video>
                                     <figcaption>{{ languageStore.t('shop.roleAdmin') }}</figcaption>
-                                </figure>
-                                <figure>
-                                    <video
-                                        :src="`${imageStore.imagePath}/cliente/video-cel.mp4`"
-                                        autoplay
-                                        muted
-                                        loop
-                                        playsinline
-                                    ></video>
-                                    <figcaption>{{ languageStore.t('shop.roleCustomer') }}</figcaption>
                                 </figure>
                             </div>
                         </div>
@@ -608,24 +598,18 @@ watch(open, async (isOpen) => {
 }
 
 .shop-admin-visuals {
-    display: grid;
-    grid-template-columns: 1.35fr 0.85fr;
-    gap: 1.2rem;
-    align-items: end;
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }
 
 .shop-admin-visuals figure {
     margin: 0;
+    width: min(100%, 28rem);
     overflow: hidden;
     background: #000;
     border: 1px solid var(--shop-line);
-}
-
-.shop-admin-visuals figure:first-child {
-    aspect-ratio: 16 / 11;
-}
-
-.shop-admin-visuals figure:last-child {
+    border-radius: 2rem;
     aspect-ratio: 9 / 16;
 }
 
@@ -640,6 +624,7 @@ watch(open, async (isOpen) => {
 .shop-admin-visuals figcaption {
     margin: 0;
     padding: 1rem 0 0;
+    text-align: center;
     font-family: var(--familyTitles), Georgia, serif;
     font-size: 1.55rem;
     color: var(--shop-gold);
@@ -772,10 +757,6 @@ watch(open, async (isOpen) => {
         grid-template-columns: 1fr;
     }
 
-    .shop-admin-visuals {
-        max-width: 56rem;
-    }
-
     .shop-offer {
         grid-template-columns: 1fr;
     }
@@ -797,15 +778,6 @@ watch(open, async (isOpen) => {
 @media (max-width: 620px) {
     .shop-mosaic {
         grid-template-columns: 1fr;
-    }
-
-    .shop-admin-visuals {
-        grid-template-columns: 1fr;
-    }
-
-    .shop-admin-visuals figure:last-child {
-        width: min(100%, 26rem);
-        margin-inline: auto;
     }
 
     .shop-offer-cta a {

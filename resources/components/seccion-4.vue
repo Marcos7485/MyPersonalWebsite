@@ -744,7 +744,6 @@ watch(open, async (isOpen) => {
     .iq-intro-visual {
         justify-self: center;
         width: min(100%, 26rem);
-        order: -1;
     }
 
     .iq-cta {
