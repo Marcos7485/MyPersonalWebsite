@@ -76,11 +76,11 @@ export default {
       'Los centros deportivos manejan alumnos, cuotas, accesos y personal en planillas sueltas o sistemas rígidos que no se adaptan a su marca ni a su tamaño.',
     caseWorkTitle: 'Qué construí',
     caseWorkBody:
-      'Sistema de gestión multi-tenant en Laravel + Vue: cada centro opera con su propia identidad, con roles separados (administrador, personal, alumno), control de acceso por QR, caja y finanzas con reportes PDF, planes de nutrición y rutinas con IA, gestión de actividades y cupos, y app de marca blanca.',
+      'Sistema de gestión multi-tenant en Laravel + Vue: cada centro opera con su propia identidad, con roles separados (administrador, personal, alumno), control de acceso por QR, caja y finanzas con reportes PDF, gestión de actividades y cupos, y app de marca blanca. Incluye un asistente con IA integrado al backend mediante function calling, capaz de ejecutar 24 operaciones de negocio por lenguaje natural (altas de alumnos, cobros de cuota, rutinas, gastos), con permisos por rol y confirmación obligatoria en acciones sensibles.',
     caseResultTitle: 'Resultado',
     caseResultBody:
       'En producción, con sitio oficial propio (iqathleticsoftware.com) y clientes usándolo. Dos planes comerciales activos: Progresivo (pago según alumnos activos) y Total (precio fijo, alumnos ilimitados).',
-    caseStack: 'Laravel · Vue 3 · TypeScript · MySQL · app mobile de marca blanca',
+    caseStack: 'Laravel · Vue 3 · TypeScript · MySQL · app mobile de marca blanca · Agente IA (function calling)',
   },
   shop: {
     brand: 'Ecommerce',

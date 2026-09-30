@@ -76,11 +76,11 @@ export default {
       'Sports centers manage students, fees, access, and staff with scattered spreadsheets or rigid systems that do not match their brand or size.',
     caseWorkTitle: 'What I built',
     caseWorkBody:
-      'A multi-tenant management system in Laravel + Vue: each center runs with its own identity, separate roles (admin, staff, student), QR access control, cash and finance with PDF reports, AI-assisted nutrition plans and routines, activity and capacity management, and a white-label app.',
+      'A multi-tenant management system in Laravel + Vue: each center runs with its own identity, separate roles (admin, staff, student), QR access control, cash and finance with PDF reports, activity and capacity management, and a white-label app. It includes an AI assistant wired into the backend through function calling, able to run 24 business operations in natural language (enrolling students, charging fees, routines, expenses), with role-based permissions and mandatory confirmation on sensitive actions.',
     caseResultTitle: 'Outcome',
     caseResultBody:
       'In production, with its own official site (iqathleticsoftware.com) and clients using it. Two active commercial plans: Progressive (pay by active students) and Total (fixed price, unlimited students).',
-    caseStack: 'Laravel · Vue 3 · TypeScript · MySQL · white-label mobile app',
+    caseStack: 'Laravel · Vue 3 · TypeScript · MySQL · white-label mobile app · AI agent (function calling)',
   },
   shop: {
     brand: 'Ecommerce',
