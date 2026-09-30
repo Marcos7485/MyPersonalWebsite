@@ -15,11 +15,12 @@ class cards extends Model
         'project',
         'card',
         'image',
+        'icon',
         'hover_text',
         'component',
         'descripcion',
         'active',
-    ];  
+    ];
 
     protected $casts = [
         'card' => 'integer',
@@ -33,11 +34,29 @@ class cards extends Model
 
     public function getImageUrlAttribute(): string
     {
-        return '/images/' . $this->project . '/' . ltrim($this->image, '/');
+        $image = trim((string) $this->image);
+        if ($image === '') {
+            return '';
+        }
+
+        if (str_starts_with($image, 'http://') || str_starts_with($image, 'https://') || str_starts_with($image, '/')) {
+            return $image;
+        }
+
+        return '/images/'.$this->project.'/'.ltrim($image, '/');
     }
 
     public function getProjectIconUrlAttribute(): string
     {
-        return '/images/' . $this->project . '/icon.png';
+        $icon = trim((string) ($this->icon ?? ''));
+        if ($icon !== '') {
+            if (str_starts_with($icon, 'http://') || str_starts_with($icon, 'https://') || str_starts_with($icon, '/')) {
+                return $icon;
+            }
+
+            return '/images/'.ltrim($icon, '/');
+        }
+
+        return '/images/'.$this->project.'/icon.png';
     }
 }

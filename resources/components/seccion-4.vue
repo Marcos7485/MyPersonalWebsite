@@ -100,6 +100,24 @@ watch(open, async (isOpen) => {
                             </div>
                         </header>
 
+                        <div class="iq-section iq-case">
+                            <div class="iq-case-grid">
+                                <article class="iq-case-card">
+                                    <h3>{{ languageStore.t('iq.caseProblemTitle') }}</h3>
+                                    <p>{{ languageStore.t('iq.caseProblemBody') }}</p>
+                                </article>
+                                <article class="iq-case-card">
+                                    <h3>{{ languageStore.t('iq.caseWorkTitle') }}</h3>
+                                    <p>{{ languageStore.t('iq.caseWorkBody') }}</p>
+                                </article>
+                                <article class="iq-case-card">
+                                    <h3>{{ languageStore.t('iq.caseResultTitle') }}</h3>
+                                    <p>{{ languageStore.t('iq.caseResultBody') }}</p>
+                                </article>
+                            </div>
+                            <p class="iq-case-stack">{{ languageStore.t('iq.caseStack') }}</p>
+                        </div>
+
                         <div class="iq-section">
                             <div class="iq-section-head">
                                 <h2>{{ languageStore.t('iq.featuresLead') }}</h2>
@@ -465,6 +483,40 @@ watch(open, async (isOpen) => {
     gap: 2.8rem;
 }
 
+.iq-case-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.4rem;
+}
+
+.iq-case-card {
+    padding: 1.6rem 1.5rem;
+    border: 1px solid var(--iq-line);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.iq-case-card h3 {
+    margin: 0 0 0.8rem;
+    font-family: var(--familyTitles), Georgia, serif;
+    font-size: 1.85rem;
+    font-weight: 400;
+    color: #ffb4b4;
+}
+
+.iq-case-card p {
+    margin: 0;
+    font-size: 1.4rem;
+    line-height: 1.5;
+    color: var(--iq-muted);
+}
+
+.iq-case-stack {
+    margin: 0;
+    font-size: 1.25rem;
+    letter-spacing: 0.04em;
+    color: rgba(255, 180, 180, 0.85);
+}
+
 .iq-section-head {
     max-width: 64rem;
 }
@@ -744,6 +796,10 @@ watch(open, async (isOpen) => {
     .iq-intro-visual {
         justify-self: center;
         width: min(100%, 26rem);
+    }
+
+    .iq-case-grid {
+        grid-template-columns: 1fr;
     }
 
     .iq-cta {

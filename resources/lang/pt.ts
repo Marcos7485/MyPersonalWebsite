@@ -71,6 +71,16 @@ export default {
     ctaBody:
       'Acesse o site oficial e descubra como a tecnologia pode otimizar seu centro e oferecer um serviço profissional e diferenciado.',
     ctaButton: 'Ir ao site oficial',
+    caseProblemTitle: 'O problema',
+    caseProblemBody:
+      'Centros esportivos gerenciam alunos, mensalidades, acessos e pessoal em planilhas soltas ou sistemas rígidos que não se adaptam à marca nem ao tamanho.',
+    caseWorkTitle: 'O que construí',
+    caseWorkBody:
+      'Sistema de gestão multi-tenant em Laravel + Vue: cada centro opera com a própria identidade, papéis separados (administrador, pessoal, aluno), controle de acesso por QR, caixa e finanças com relatórios PDF, planos de nutrição e rotinas com IA, gestão de atividades e vagas, e app white-label.',
+    caseResultTitle: 'Resultado',
+    caseResultBody:
+      'Em produção, com site oficial próprio (iqathleticsoftware.com) e clientes usando. Dois planos comerciais ativos: Progressivo (pagamento conforme alunos ativos) e Total (preço fixo, alunos ilimitados).',
+    caseStack: 'Laravel · Vue 3 · TypeScript · MySQL · app mobile white-label',
   },
   shop: {
     brand: 'Ecommerce',
@@ -150,6 +160,16 @@ export default {
     ctaBody:
       'Ecommerce pronto para usar. Seu catálogo, seus preços, seu Mercado Pago. O cliente paga em pesos; você recebe na sua conta.',
     ctaButton: 'Quero minha loja',
+    caseProblemTitle: 'O problema',
+    caseProblemBody:
+      'Comércios que querem vender online, mas não têm como gerir catálogo, estoque, preços e cobranças sem depender de templates genéricos ou de um intermediário que fica com a margem.',
+    caseWorkTitle: 'O que construí',
+    caseWorkBody:
+      'Ecommerce própria com painel de administração completo: alta/edição de produtos e estoque, cotação do dólar que atualiza todos os preços de uma vez, Mercado Pago integrado com as keys do cliente (o dinheiro entra direto na conta dele), vendas em tempo real, logística (motoristas, veículos, despacho), comprovantes e identidade da loja configurável. Vista do cliente com catálogo por categorias, ofertas e carrinho.',
+    caseResultTitle: 'Resultado',
+    caseResultBody:
+      'Produto pronto para vender: uma instalação = uma loja = o domínio dele, com domínio, hosting, manutenção e suporte incluídos. O cliente sobe produtos e começa a vender sem montar nada técnico.',
+    caseStack: 'Laravel · Vue 3 · MySQL · Mercado Pago API · hosting + domínio próprios',
   },
   reviews: {
     title: 'Reviews',

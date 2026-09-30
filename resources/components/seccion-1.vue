@@ -28,13 +28,17 @@ const languageStore = useLanguageStore();
 const aboutOpen = ref(false);
 
 const arcBrand = computed(() => {
-    const first = props.cards[0]
-    if (first) {
+    const preferred =
+        props.cards.find((card) => card.project === 'iqathletic')
+        ?? props.cards[0]
+
+    if (preferred) {
         return {
-            src: first.projectIconUrl,
-            alt: first.project,
+            src: preferred.projectIconUrl,
+            alt: preferred.hover_text || preferred.project,
         }
     }
+
     return {
         src: `${imageStore.imagePath || '/images'}/iqathletic/icon.png`,
         alt: 'iqathletic',

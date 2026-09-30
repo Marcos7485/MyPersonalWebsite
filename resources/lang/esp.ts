@@ -71,6 +71,16 @@ export default {
     ctaBody:
       'Entrá al sitio oficial y descubrí cómo la tecnología puede ayudarte a optimizar tu centro y brindar un servicio profesional y diferenciado.',
     ctaButton: 'Ir al sitio oficial',
+    caseProblemTitle: 'El problema',
+    caseProblemBody:
+      'Los centros deportivos manejan alumnos, cuotas, accesos y personal en planillas sueltas o sistemas rígidos que no se adaptan a su marca ni a su tamaño.',
+    caseWorkTitle: 'Qué construí',
+    caseWorkBody:
+      'Sistema de gestión multi-tenant en Laravel + Vue: cada centro opera con su propia identidad, con roles separados (administrador, personal, alumno), control de acceso por QR, caja y finanzas con reportes PDF, planes de nutrición y rutinas con IA, gestión de actividades y cupos, y app de marca blanca.',
+    caseResultTitle: 'Resultado',
+    caseResultBody:
+      'En producción, con sitio oficial propio (iqathleticsoftware.com) y clientes usándolo. Dos planes comerciales activos: Progresivo (pago según alumnos activos) y Total (precio fijo, alumnos ilimitados).',
+    caseStack: 'Laravel · Vue 3 · TypeScript · MySQL · app mobile de marca blanca',
   },
   shop: {
     brand: 'Ecommerce',
@@ -150,6 +160,16 @@ export default {
     ctaBody:
       'Ecommerce lista para usar. Tu catálogo, tus precios, tu Mercado Pago. El cliente paga en pesos; vos cobrás en tu cuenta.',
     ctaButton: 'Quiero mi tienda',
+    caseProblemTitle: 'El problema',
+    caseProblemBody:
+      'Comercios que quieren vender online pero no tienen cómo manejar catálogo, stock, precios y cobros sin depender de plantillas genéricas o de un tercero que se queda con el margen.',
+    caseWorkTitle: 'Qué construí',
+    caseWorkBody:
+      'Ecommerce propia con panel de administración completo: alta/edición de productos y stock, cotización del dólar que actualiza todos los precios de una vez, Mercado Pago integrado con las keys del cliente (el dinero entra directo a su cuenta), ventas en tiempo real, logística (choferes, vehículos, despacho), boletas e identidad de tienda configurable. Vista de cliente con catálogo por categorías, ofertas y carrito.',
+    caseResultTitle: 'Resultado',
+    caseResultBody:
+      'Producto listo para vender: una instalación = una tienda = su dominio, con dominio, hosting, mantenimiento y soporte incluidos. El cliente sube productos y empieza a vender sin armar nada técnico.',
+    caseStack: 'Laravel · Vue 3 · MySQL · Mercado Pago API · hosting + dominio propios',
   },
   reviews: {
     title: 'Reviews',

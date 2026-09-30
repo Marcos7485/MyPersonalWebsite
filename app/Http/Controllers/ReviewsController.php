@@ -23,13 +23,15 @@ class ReviewsController extends Controller
                 'project' => $card->project,
                 'card' => $card->card,
                 'image' => $card->image,
+                'icon' => $card->icon,
                 'hover_text' => $card->hover_text,
                 'descripcion' => $card->descripcion,
                 'component' => $card->component,
                 'active' => $card->active,
                 'imageUrl' => $card->image_url,
                 'projectIconUrl' => $card->project_icon_url,
-            ]);
+            ])
+            ->values();
 
         return Inertia::render('Main', [
             'reviews' => $reviews,

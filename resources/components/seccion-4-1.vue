@@ -121,6 +121,24 @@ watch(open, async (isOpen) => {
                             </div>
                         </header>
 
+                        <div class="shop-block shop-case">
+                            <div class="shop-case-grid">
+                                <article class="shop-case-card">
+                                    <h3>{{ languageStore.t('shop.caseProblemTitle') }}</h3>
+                                    <p>{{ languageStore.t('shop.caseProblemBody') }}</p>
+                                </article>
+                                <article class="shop-case-card">
+                                    <h3>{{ languageStore.t('shop.caseWorkTitle') }}</h3>
+                                    <p>{{ languageStore.t('shop.caseWorkBody') }}</p>
+                                </article>
+                                <article class="shop-case-card">
+                                    <h3>{{ languageStore.t('shop.caseResultTitle') }}</h3>
+                                    <p>{{ languageStore.t('shop.caseResultBody') }}</p>
+                                </article>
+                            </div>
+                            <p class="shop-case-stack">{{ languageStore.t('shop.caseStack') }}</p>
+                        </div>
+
                         <div class="shop-block">
                             <div class="shop-block-head">
                                 <h2>{{ languageStore.t('shop.featuresLead') }}</h2>
@@ -492,6 +510,40 @@ watch(open, async (isOpen) => {
     margin-bottom: 2.4rem;
 }
 
+.shop-case-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.4rem;
+}
+
+.shop-case-card {
+    padding: 1.6rem 1.5rem;
+    border-top: 2px solid rgba(201, 166, 107, 0.55);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.shop-case-card h3 {
+    margin: 0 0 0.8rem;
+    font-family: var(--familyTitles), Georgia, serif;
+    font-size: 1.85rem;
+    font-weight: 400;
+    color: #e8c989;
+}
+
+.shop-case-card p {
+    margin: 0;
+    font-size: 1.4rem;
+    line-height: 1.5;
+    color: var(--shop-muted);
+}
+
+.shop-case-stack {
+    margin: 1.6rem 0 0;
+    font-size: 1.25rem;
+    letter-spacing: 0.04em;
+    color: rgba(232, 201, 137, 0.85);
+}
+
 .shop-mosaic {
     list-style: none;
     margin: 0;
@@ -751,6 +803,10 @@ watch(open, async (isOpen) => {
 @media (max-width: 1100px) {
     .shop-mosaic {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .shop-case-grid {
+        grid-template-columns: 1fr;
     }
 
     .shop-block--admin {

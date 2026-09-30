@@ -21,7 +21,8 @@ export interface AppCard {
   id: number
   project: string
   card: number
-  image: string
+  image: string | null
+  icon?: string | null
   hover_text: string | null
   descripcion: string | null
   component: string | null
@@ -37,6 +38,13 @@ const props = defineProps<{
 
 const imageStore = useImageStore()
 imageStore.fetchImagePath()
+
+const hasProject = (slug: string) =>
+  props.cards.some((card) => card.project === slug && card.active)
+
+/** Si cards viene vacío (ej. antes del seed), no ocultamos las secciones. */
+const showIq = computed(() => props.cards.length === 0 || hasProject('iqathletic'))
+const showShop = computed(() => props.cards.length === 0 || hasProject('ecommerce'))
 
 /** Assets que deben estar listos antes de salir del intro */
 const criticalAssets = computed(() => {
@@ -145,8 +153,8 @@ onUnmounted(() => {
             @dock-done="onDockDone"
         />
         <Seccion1 :cards="props.cards" />
-        <Seccion4 />
-        <Seccion41 />
+        <Seccion4 v-if="showIq" />
+        <Seccion41 v-if="showShop" />
         <Seccion5 :reviews="props.reviews"></Seccion5>
         <Seccion6></Seccion6>
         <Footer></Footer>

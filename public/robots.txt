@@ -1,2 +1,5 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# Actualizá la URL si tu dominio canónico es otro
+Sitemap: https://dragonrojosoftware.com/sitemap.xml

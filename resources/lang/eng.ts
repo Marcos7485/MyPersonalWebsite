@@ -71,6 +71,16 @@ export default {
     ctaBody:
       'Visit the official site and see how technology can help you optimize your center and deliver a professional, differentiated service.',
     ctaButton: 'Go to official site',
+    caseProblemTitle: 'The problem',
+    caseProblemBody:
+      'Sports centers manage students, fees, access, and staff with scattered spreadsheets or rigid systems that do not match their brand or size.',
+    caseWorkTitle: 'What I built',
+    caseWorkBody:
+      'A multi-tenant management system in Laravel + Vue: each center runs with its own identity, separate roles (admin, staff, student), QR access control, cash and finance with PDF reports, AI-assisted nutrition plans and routines, activity and capacity management, and a white-label app.',
+    caseResultTitle: 'Outcome',
+    caseResultBody:
+      'In production, with its own official site (iqathleticsoftware.com) and clients using it. Two active commercial plans: Progressive (pay by active students) and Total (fixed price, unlimited students).',
+    caseStack: 'Laravel · Vue 3 · TypeScript · MySQL · white-label mobile app',
   },
   shop: {
     brand: 'Ecommerce',
@@ -150,6 +160,16 @@ export default {
     ctaBody:
       'Ecommerce ready to use. Your catalog, your prices, your Mercado Pago. Customers pay in pesos; you get paid in your account.',
     ctaButton: 'I want my store',
+    caseProblemTitle: 'The problem',
+    caseProblemBody:
+      'Businesses that want to sell online but cannot manage catalog, stock, pricing, and payments without generic templates or a middleman that keeps the margin.',
+    caseWorkTitle: 'What I built',
+    caseWorkBody:
+      'A full-owned ecommerce with a complete admin panel: product and stock CRUD, a dollar rate that updates all prices at once, Mercado Pago integrated with the client’s own keys (money goes straight to their account), real-time sales, logistics (drivers, vehicles, dispatch), receipts, and configurable store identity. Customer view with category catalog, offers, and cart.',
+    caseResultTitle: 'Outcome',
+    caseResultBody:
+      'A ready-to-sell product: one install = one store = their domain, with domain, hosting, maintenance, and support included. The client uploads products and starts selling with no technical setup.',
+    caseStack: 'Laravel · Vue 3 · MySQL · Mercado Pago API · own hosting + domain',
   },
   reviews: {
     title: 'Reviews',
