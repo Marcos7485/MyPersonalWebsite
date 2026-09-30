@@ -1,4 +1,4 @@
-export default {
+﻿export default {
   nav: {
     home: 'Início',
     softwares: 'Softwares',
@@ -165,11 +165,11 @@ export default {
       'Comércios que querem vender online, mas não têm como gerir catálogo, estoque, preços e cobranças sem depender de templates genéricos ou de um intermediário que fica com a margem.',
     caseWorkTitle: 'O que construí',
     caseWorkBody:
-      'Ecommerce própria com painel de administração completo: alta/edição de produtos e estoque, cotação do dólar que atualiza todos os preços de uma vez, Mercado Pago integrado com as keys do cliente (o dinheiro entra direto na conta dele), vendas em tempo real, logística (motoristas, veículos, despacho), comprovantes e identidade da loja configurável. Vista do cliente com catálogo por categorias, ofertas e carrinho.',
+      'Ecommerce própria com painel de administração completo: alta/edição de produtos e estoque, cotação do dólar que atualiza todos os preços de uma vez, Mercado Pago integrado com as keys do cliente (o dinheiro entra direto na conta dele), vendas em tempo real, logística (motoristas, veículos, despacho), comprovantes e identidade da loja configurável. Vista do cliente com catálogo por categorias, ofertas e carrinho. Inclui um chatbot de ajuda para tirar dúvidas sobre o uso do painel administrador.',
     caseResultTitle: 'Resultado',
     caseResultBody:
       'Produto pronto para vender: uma instalação = uma loja = o domínio dele, com domínio, hosting, manutenção e suporte incluídos. O cliente sobe produtos e começa a vender sem montar nada técnico.',
-    caseStack: 'Laravel · Vue 3 · MySQL · Mercado Pago API · hosting + domínio próprios',
+    caseStack: 'Laravel · Vue 3 · MySQL · Mercado Pago API · hosting + domínio próprios · Chatbot de ajuda admin',
   },
   reviews: {
     title: 'Reviews',

@@ -1,4 +1,4 @@
-export default {
+﻿export default {
   nav: {
     home: 'Home',
     softwares: 'Softwares',
@@ -165,11 +165,11 @@ export default {
       'Businesses that want to sell online but cannot manage catalog, stock, pricing, and payments without generic templates or a middleman that keeps the margin.',
     caseWorkTitle: 'What I built',
     caseWorkBody:
-      'A full-owned ecommerce with a complete admin panel: product and stock CRUD, a dollar rate that updates all prices at once, Mercado Pago integrated with the client’s own keys (money goes straight to their account), real-time sales, logistics (drivers, vehicles, dispatch), receipts, and configurable store identity. Customer view with category catalog, offers, and cart.',
+      'A full-owned ecommerce with a complete admin panel: product and stock CRUD, a dollar rate that updates all prices at once, Mercado Pago integrated with the client’s own keys (money goes straight to their account), real-time sales, logistics (drivers, vehicles, dispatch), receipts, and configurable store identity. Customer view with category catalog, offers, and cart. It includes a help chatbot to answer questions about how to use the admin panel.',
     caseResultTitle: 'Outcome',
     caseResultBody:
       'A ready-to-sell product: one install = one store = their domain, with domain, hosting, maintenance, and support included. The client uploads products and starts selling with no technical setup.',
-    caseStack: 'Laravel · Vue 3 · MySQL · Mercado Pago API · own hosting + domain',
+    caseStack: 'Laravel · Vue 3 · MySQL · Mercado Pago API · own hosting + domain · Admin help chatbot',
   },
   reviews: {
     title: 'Reviews',
