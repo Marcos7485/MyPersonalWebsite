@@ -5,6 +5,15 @@
 
     RewriteEngine On
 
+    # Canonical: www -> apex (dragonrojosoftware.com)
+    RewriteCond %{HTTP_HOST} ^www\.dragonrojosoftware\.com$ [NC]
+    RewriteRule ^ https://dragonrojosoftware.com%{REQUEST_URI} [L,R=301]
+
+    # Force HTTPS on apex (por si entra por http)
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP_HOST} ^(www\.)?dragonrojosoftware\.com$ [NC]
+    RewriteRule ^ https://dragonrojosoftware.com%{REQUEST_URI} [L,R=301]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

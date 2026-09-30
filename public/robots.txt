@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
 
-# Actualizá la URL si tu dominio canónico es otro
+# Canonical sitemap (apex)
 Sitemap: https://dragonrojosoftware.com/sitemap.xml
