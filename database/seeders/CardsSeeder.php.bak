@@ -23,24 +23,15 @@ class CardsSeeder extends Seeder
             [
                 'project' => 'ecommerce',
                 'card' => 2,
-                'image' => '',
+                'image' => null,
                 'icon' => 'drs.webp',
                 'hover_text' => 'Ecommerce',
-                'component' => '',
+                'component' => null,
                 'descripcion' => 'Tienda online lista para vender',
                 'active' => true,
             ],
-            [
-                'project' => 'zankou',
-                'card' => 3,
-                'image' => '',
-                'icon' => 'seccion-4-2/logo.png',
-                'hover_text' => 'Zankou',
-                'component' => '',
-                'descripcion' => 'Asistente de IA de escritorio con memoria persistente y vision',
-                'active' => true,
-            ],
         ];
+
         foreach ($rows as $row) {
             cards::query()->updateOrCreate(
                 [
@@ -52,4 +43,3 @@ class CardsSeeder extends Seeder
         }
     }
 }
-

@@ -1,10 +1,11 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Header from '../../components/HeaderView.vue'
 import Footer from '../../components/FooterView.vue'
 import Seccion1 from '../../components/seccion-1.vue'
 import Seccion4 from '../../components/seccion-4.vue'
 import Seccion41 from '../../components/seccion-4-1.vue'
+import Seccion42 from '../../components/seccion-4-2.vue'
 import Seccion5 from '../../components/seccion-5.vue'
 import Seccion6 from '../../components/seccion-6.vue'
 import PageIntro from '../../components/PageIntro.vue'
@@ -45,6 +46,7 @@ const hasProject = (slug: string) =>
 /** Si cards viene vacío (ej. antes del seed), no ocultamos las secciones. */
 const showIq = computed(() => props.cards.length === 0 || hasProject('iqathletic'))
 const showShop = computed(() => props.cards.length === 0 || hasProject('ecommerce'))
+const showZankou = computed(() => props.cards.length === 0 || hasProject('zankou'))
 
 /** Assets que deben estar listos antes de salir del intro */
 const criticalAssets = computed(() => {
@@ -61,10 +63,26 @@ const criticalAssets = computed(() => {
     `${base}/seccion-4/2.jpg`,
     `${base}/seccion-4/3.jpg`,
     `${base}/seccion-4/4.jpg`,
+    `${base}/seccion-4/asistente-avatar-1.png`,
     `${base}/cliente/video-cel.mp4`,
     `${base}/cliente/video.mp4`,
     `${base}/seccion-41/banner.mp4`,
     `${base}/seccion-41/video1.mp4`,
+    `${base}/seccion-4-2/modo-profesora.png`,
+    `${base}/seccion-4-2/modo-musica.png`,
+    `${base}/seccion-4-2/modo-bar.png`,
+    `${base}/seccion-4-2/cambio-expresion-bar.mp4`,
+    `${base}/seccion-4-2/hold-on.m4a`,
+    `${base}/seccion-4-2/cambio-expresion-bar-2.mp4`,
+    `${base}/seccion-4-2/modo-truco.jpg`,
+    `${base}/seccion-4-2/expresiones/admiracion.gif`,
+    `${base}/seccion-4-2/expresiones/confundida.gif`,
+    `${base}/seccion-4-2/expresiones/enamorada.gif`,
+    `${base}/seccion-4-2/expresiones/orgullosa.gif`,
+    `${base}/seccion-4-2/expresiones/observando.gif`,
+    `${base}/seccion-4-2/expresiones/pensativa-melancolica.gif`,
+    `${base}/seccion-4-2/expresiones/pensativa-profundo.gif`,
+    `${base}/seccion-4-2/expresiones/pensativa-sexy.gif`,
     `${base}/seccion-5/figura1.svg`,
     `${base}/seccion-5/figura2.svg`,
     `${base}/seccion-5/figura3.svg`,
@@ -89,7 +107,7 @@ const criticalAssets = computed(() => {
   return [...new Set(list)]
 })
 
-/** Dragón: loading (centro) → docking (vuelo al dock) → done */
+/** DragÃ³n: loading (centro) â†’ docking (vuelo al dock) â†’ done */
 const introPhase = ref<'loading' | 'docking' | 'done'>('loading')
 const introActive = ref(true)
 const revealPage = ref(false)
@@ -107,7 +125,7 @@ const onIntroLoaded = () => {
   introPhase.value = 'docking'
 }
 
-/** Mitad del vuelo: abrir velo para ver el dragón acomodarse sobre la página */
+/** Mitad del vuelo: abrir velo para ver el dragÃ³n acomodarse sobre la pÃ¡gina */
 const onDockNearEnd = () => {
   revealPage.value = true
   goToFirstSection()
@@ -155,6 +173,7 @@ onUnmounted(() => {
         <Seccion1 :cards="props.cards" />
         <Seccion4 v-if="showIq" />
         <Seccion41 v-if="showShop" />
+        <Seccion42 v-if="showZankou" />
         <Seccion5 :reviews="props.reviews"></Seccion5>
         <Seccion6></Seccion6>
         <Footer></Footer>

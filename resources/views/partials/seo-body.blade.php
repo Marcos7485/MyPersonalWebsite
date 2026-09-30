@@ -42,15 +42,37 @@
         <p>
             <strong>Qué construí:</strong>
             Ecommerce propia con panel admin, cotización del dólar, Mercado Pago con keys del cliente,
-            logística y catálogo para el comprador.
+            logística, catálogo para el comprador y chatbot de ayuda sobre el uso del administrador.
         </p>
         <p>
             <strong>Resultado:</strong>
             Una instalación = una tienda = su dominio, con hosting y soporte incluidos.
             El cliente sube productos y vende sin armar nada técnico.
         </p>
-        <p>Stack: Laravel · Vue 3 · MySQL · Mercado Pago API · hosting + dominio propios</p>
+        <p>Stack: Laravel · Vue 3 · MySQL · Mercado Pago API · hosting + dominio propios · Chatbot de ayuda admin</p>
         <p><a href="{{ url('/#Ecommerce') }}">Ver Ecommerce en este portafolio</a></p>
+    </article>
+
+    <article>
+        <h3>Zankou</h3>
+        <p>Una IA con memoria, ojos y cerebro propio.</p>
+        <p>
+            <strong>Problema:</strong>
+            Los asistentes de IA viven en una pestaña: no recuerdan, no ven la pantalla
+            y no pueden tocar la computadora.
+        </p>
+        <p>
+            <strong>Qué construí:</strong>
+            Asistente de escritorio (Electron + Node.js) con memoria persistente, visión por computador,
+            control del sistema y modelos propios entrenándose en local.
+        </p>
+        <p>
+            <strong>Resultado:</strong>
+            Un asistente que funciona todos los días: recuerda, opera la PC y aprende de sus errores.
+            Laboratorio de ideas que después van a productos comerciales.
+        </p>
+        <p>Stack: Electron · Node.js · PowerShell · OCR · modelos propios · AWS S3 · WhatsApp</p>
+        <p><a href="{{ url('/#SoftwaresZankou') }}">Ver Zankou en este portafolio</a></p>
     </article>
 
     <h2>Contacto</h2>
@@ -65,12 +87,13 @@
     <section>
         <h1>Dragon Rojo Software</h1>
         <p>
-            Desarrollo web fullstack. Softwares: iQ Athletic (gestión deportiva) y Ecommerce (tienda online).
+            Desarrollo web fullstack. Softwares: iQ Athletic, Ecommerce y Zankou.
             Activá JavaScript para la experiencia completa del sitio.
         </p>
         <ul>
             <li><a href="https://www.iqathleticsoftware.com">iQ Athletic</a></li>
             <li><a href="{{ url('/#Ecommerce') }}">Ecommerce</a></li>
+            <li><a href="{{ url('/#SoftwaresZankou') }}">Zankou</a></li>
             <li><a href="{{ url('/#Contacto') }}">Contacto</a></li>
         </ul>
     </section>

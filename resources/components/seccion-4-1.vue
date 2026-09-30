@@ -453,13 +453,15 @@ watch(open, async (isOpen) => {
 .shop-intro {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: clamp(2rem, 3vw, 2.8rem);
+    text-align: center;
 }
 
 .shop-intro-top {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 1.6rem;
 }
 
@@ -474,20 +476,21 @@ watch(open, async (isOpen) => {
 .shop-intro-main {
     display: block;
     max-width: 58rem;
+    margin-inline: auto;
 }
 
 .shop-intro-copy h1 {
-    margin: 0 0 1.4rem;
+    margin: 0 auto 1.4rem;
     font-family: var(--familyTitles), Georgia, serif;
     font-size: clamp(3rem, 5vw, 5.2rem);
     font-weight: 400;
     line-height: 1.08;
     color: #fff;
-    max-width: 14ch;
+    max-width: 18ch;
 }
 
 .shop-intro-copy p {
-    margin: 0;
+    margin: 0 auto;
     max-width: 48rem;
     font-size: clamp(1.5rem, 1.55vw, 1.75rem);
     line-height: 1.65;

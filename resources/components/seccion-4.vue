@@ -20,6 +20,16 @@ const onIntersect = () => {
 }
 
 const features = computed(() => languageStore.messages.iq.features)
+const assistantPoints = computed(
+    () => languageStore.messages.iq.assistantPoints as string[],
+)
+const assistantAvatars = computed(() => [
+    {
+        image: 'asistente-avatar-1.png',
+        title: languageStore.t('iq.assistantDragon'),
+        body: languageStore.t('iq.assistantDragonBody'),
+    },
+])
 
 const featureIcons = [
     'fa-users',
@@ -150,6 +160,47 @@ watch(open, async (isOpen) => {
                                 <figure class="iq-menu-shot">
                                     <img :src="`${imageStore.imagePath}/seccion-4/2.jpg`" alt="" />
                                 </figure>
+                            </div>
+                        </div>
+
+                        <div class="iq-section iq-assistant">
+                            <div class="iq-section-head">
+                                <h2>{{ languageStore.t('iq.assistantTitle') }}</h2>
+                                <p class="iq-section-sub">{{ languageStore.t('iq.assistantLead') }}</p>
+                            </div>
+
+                            <p class="iq-assistant-body">
+                                {{ languageStore.t('iq.assistantBody') }}
+                            </p>
+
+                            <div class="iq-assistant-layout">
+                                <ul class="iq-assistant-points">
+                                    <li
+                                        v-for="point in assistantPoints"
+                                        :key="point"
+                                    >
+                                        {{ point }}
+                                    </li>
+                                </ul>
+
+                                <div class="iq-assistant-avatars">
+                                    <figure
+                                        v-for="avatar in assistantAvatars"
+                                        :key="avatar.image"
+                                        class="iq-assistant-avatar"
+                                    >
+                                        <div class="iq-assistant-avatar-frame">
+                                            <img
+                                                :src="`${imageStore.imagePath}/seccion-4/${avatar.image}`"
+                                                :alt="avatar.title"
+                                            />
+                                        </div>
+                                        <figcaption>
+                                            <strong>{{ avatar.title }}</strong>
+                                            <span>{{ avatar.body }}</span>
+                                        </figcaption>
+                                    </figure>
+                                </div>
                             </div>
                         </div>
 
@@ -519,6 +570,8 @@ watch(open, async (isOpen) => {
 
 .iq-section-head {
     max-width: 64rem;
+    margin-inline: auto;
+    text-align: center;
 }
 
 .iq-section-head h2 {
@@ -531,7 +584,7 @@ watch(open, async (isOpen) => {
 }
 
 .iq-section-sub {
-    margin: 1rem 0 0;
+    margin: 1rem auto 0;
     max-width: 52rem;
     font-size: clamp(1.45rem, 1.5vw, 1.7rem);
     line-height: 1.6;
@@ -600,6 +653,99 @@ watch(open, async (isOpen) => {
     font-size: clamp(1.35rem, 1.4vw, 1.55rem);
     line-height: 1.55;
     color: var(--iq-muted);
+}
+
+.iq-assistant-body {
+    margin: 0 auto;
+    max-width: 72rem;
+    font-size: clamp(1.4rem, 1.55vw, 1.7rem);
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.78);
+    text-align: center;
+}
+
+.iq-assistant-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(16rem, 0.8fr);
+    gap: clamp(2rem, 4vw, 3.5rem);
+    align-items: start;
+}
+
+.iq-assistant-points {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.iq-assistant-points li {
+    position: relative;
+    padding-left: 1.5rem;
+    font-size: clamp(1.3rem, 1.4vw, 1.5rem);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.iq-assistant-points li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.65em;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--iq-red);
+}
+
+.iq-assistant-avatars {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+}
+
+.iq-assistant-avatar {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.iq-assistant-avatar-frame {
+    width: min(100%, 22rem);
+    margin-inline: auto;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border: 1px solid var(--iq-line);
+    background: #050505;
+}
+
+.iq-assistant-avatar-frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.iq-assistant-avatar figcaption {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    text-align: center;
+}
+
+.iq-assistant-avatar strong {
+    font-family: var(--familyTitles), Georgia, serif;
+    font-size: clamp(1.7rem, 1.9vw, 2.1rem);
+    font-weight: 500;
+    color: #fff;
+}
+
+.iq-assistant-avatar span {
+    font-size: clamp(1.25rem, 1.35vw, 1.45rem);
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .iq-menu-shot {
@@ -769,6 +915,10 @@ watch(open, async (isOpen) => {
 
 @media (max-width: 1100px) {
     .iq-features-row {
+        grid-template-columns: 1fr;
+    }
+
+    .iq-assistant-layout {
         grid-template-columns: 1fr;
     }
 

@@ -54,6 +54,18 @@ VALUES
     1,
     NOW(),
     NOW()
+  ),
+  (
+    'zankou',
+    3,
+    NULL,
+    'seccion-4-2/logo.png',
+    'Zankou',
+    NULL,
+    'Asistente de IA de escritorio con memoria, vision y control del sistema',
+    1,
+    NOW(),
+    NOW()
   )
 ON DUPLICATE KEY UPDATE
   `image` = VALUES(`image`),
@@ -64,5 +76,5 @@ ON DUPLICATE KEY UPDATE
   `active` = VALUES(`active`),
   `updated_at` = NOW();
 
--- 5) Verificación
+-- 5) Verificacion
 SELECT id, project, card, icon, hover_text, active FROM `cards` ORDER BY card;
